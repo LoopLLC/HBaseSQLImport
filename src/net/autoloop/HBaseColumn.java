@@ -6,48 +6,27 @@ package net.autoloop;
  * @author ericzbeard
  */
 public class HBaseColumn {
-	protected String tableName;
 	protected String columnFamily;
-	protected String attribute;
+	protected String qualifier;
 	protected String logicalName;
 	protected String description;
-	protected String key;
+	protected String sqlName;
 	
 	public void validate(String type) throws Exception {
-		if (this.tableName == null) {
-			throw new Exception("-hbt HBaseTable must be given");
-		}
 		
 		switch (type) {
 			case "Table":
-				if (this.key == null) {
-					throw new Exception("-hbk HBaseKey must be given for -ty Table");
-				}
 				break;
 			case "Column":
 				if (this.columnFamily == null) {
 					throw new Exception("-hbc HBaseCF must be given for -ty Column");
 				}
-				if (this.attribute == null) {
-					throw new Exception("-hba HBaseAttribute must be given for -ty Column");
+				if (this.qualifier == null) {
+					throw new Exception("-hbq HBaseQualifier must be given for -ty Column");
 				}
 				break;
 			default: throw new Exception("Unexpected type");
 		}
-	}
-
-	/**
-	 * @return the tableName
-	 */
-	public String getTableName() {
-		return tableName;
-	}
-
-	/**
-	 * @param tableName the tableName to set
-	 */
-	public void setTableName(String tableName) {
-		this.tableName = tableName;
 	}
 
 	/**
@@ -65,17 +44,17 @@ public class HBaseColumn {
 	}
 
 	/**
-	 * @return the attribute
+	 * @return the qualifier
 	 */
-	public String getAttribute() {
-		return attribute;
+	public String getQualifier() {
+		return qualifier;
 	}
 
 	/**
-	 * @param attribute the attribute to set
+	 * @param qualifier the qualifier to set
 	 */
-	public void setAttribute(String attribute) {
-		this.attribute = attribute;
+	public void setQualifier(String qualifier) {
+		this.qualifier = qualifier;
 	}
 
 	/**
@@ -107,16 +86,16 @@ public class HBaseColumn {
 	}
 
 	/**
-	 * @return the key
+	 * @return the sqlName
 	 */
-	public String getKey() {
-		return key;
+	public String getSqlName() {
+		return sqlName;
 	}
 
 	/**
-	 * @param key the key to set
+	 * @param sqlName the sqlName to set
 	 */
-	public void setKey(String key) {
-		this.key = key;
+	public void setSqlName(String sqlName) {
+		this.sqlName = sqlName;
 	}
 }

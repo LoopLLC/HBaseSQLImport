@@ -4,6 +4,9 @@
  */
 package net.autoloop;
 
+import org.apache.hadoop.hbase.KeyValue;
+import org.apache.hadoop.hbase.client.Result;
+
 /**
  * 
  * Describes a mapping from a SQL column or table to the HBase schema.
@@ -14,7 +17,7 @@ package net.autoloop;
 	k - Key - CompanyId
 	hbt - HBaseTable - company
 	hbcf - HBaseCF - d
-	hba - HBaseAttr - asr
+	hbq - HBaseAttr - asr
 	hbk - HBaseKey - cid
 	hbl - HBaseLogicalName - CompanyId
 	hbd - HBaseDescription - The unique ID of the company
@@ -25,12 +28,83 @@ public class HBaseDescription {
 	
 	protected String queryName;
 	protected String query;
-	protected String column;
+	protected String tableName;
 	protected String sqlKey;
 	protected String type;
 	protected HBaseColumn hbaseColumn;
+	
+	public static HBaseDescription fromResult(Result r) {
+		HBaseDescription d = new HBaseDescription();
+		HBaseColumn c = new HBaseColumn();
+		d.setHbaseColumn(c);
+		
+		/*
+		 *  
+			Companies hbt company
+			Companies k CompanyId
+			Companies q [SQL Query not shown, use -query to see it]
+			Companies qn Companies
+			* 
+			* or
+			* 
+			Companies_CompanyName c CompanyName
+			Companies_CompanyName hbcf d
+			Companies_CompanyName hbd The name of the company
+			Companies_CompanyName hbl CompanyName
+			Companies_CompanyName hbq cn
+			Companies_CompanyName hbt company
+			Companies_CompanyName qn Companies
+		 */
+		
+		String rowKey = new String(r.getRow());
+		
+		for (KeyValue kv:r.raw()) {
+			String qualifier = new String(kv.getQualifier());
+			String value = new String(kv.getValue());
+			switch (qualifier) {
+				case "qn": // Query Name
+					d.setQueryName(value);
+					break;
+				case "q": // Query File
+					d.setQuery(value);
+					break;
+				case "k":
+					d.setSqlKey(value);
+					break;
+				case "hbt":
+					d.setTableName(value);
+					break;
+				case "hbcf":
+					c.setColumnFamily(value);
+					break;
+				case "hbq":
+					c.setQualifier(value);
+					break;
+				case "c":
+					c.setSqlName(value);
+					break;
+				case "hbl":
+					c.setLogicalName(value);
+					break;
+				case "hbd":
+					c.setDescription(value);
+					break;
+				case "ty":
+					d.setType(value);
+					break;
+				default: break;
+			}
+		}
+		
+		return d;
+	}
 
 	public void validate() throws Exception {
+		
+		if (this.tableName == null) {
+			throw new Exception("-hbt HBaseTable must be given");
+		}
+		
 		if (this.queryName == null) {
 			throw new Exception("-qn QueryName is required");
 		}
@@ -49,9 +123,6 @@ public class HBaseDescription {
 				}
 				break;
 			case "Column":
-				if (this.column == null) {
-					throw new Exception("--c SQLColumn must be given for -ty Column");
-				}
 				break;
 			default: throw new Exception("Unexpected type, should be Table or Column");
 		}
@@ -72,10 +143,24 @@ public class HBaseDescription {
 		if (this.type != null && this.type.equals("Table")) {
 			return this.queryName;
 		} else {
-			return this.queryName + "_" + this.column;
+			return this.queryName + "_" + this.hbaseColumn.getSqlName();
 		}
 	}
 	
+	/**
+	 * @return the tableName
+	 */
+	public String getTableName() {
+		return tableName;
+	}
+
+	/**
+	 * @param tableName the tableName to set
+	 */
+	public void setTableName(String tableName) {
+		this.tableName = tableName;
+	}
+
 	/**
 	 * @return the queryName
 	 */
@@ -102,20 +187,6 @@ public class HBaseDescription {
 	 */
 	public void setQuery(String query) {
 		this.query = query;
-	}
-
-	/**
-	 * @return the column
-	 */
-	public String getColumn() {
-		return column;
-	}
-
-	/**
-	 * @param column the column to set
-	 */
-	public void setColumn(String column) {
-		this.column = column;
 	}
 
 	/**

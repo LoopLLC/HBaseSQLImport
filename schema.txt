@@ -1,0 +1,24 @@
+java -jar dist/HBaseSQLImport.jar -qn Companies -ty Table -hbt company -k CompanyId -save -q sql/companies.sql 
+
+java -jar dist/HBaseSQLImport.jar -qn Companies -ty Column -c CompanyName -hbt company -hbcf d -hbq cn -hbl CompanyName -hbd "The name of the company" -save
+
+JSON?
+
+[
+	{ 
+		qn:"Companies", 
+		ty:"Table", 
+		hbt:"company", 
+		k:"CompanyId", 
+		q:"sql/companies.sql"
+	}, 
+	{
+		qn:"Companies", 
+		ty:"Column", 
+		c:"CompanyName", 
+		hbcf:"d", 
+		hbq:"cn", 
+		hbl:"Company Name", 
+		hbd:"The name of the company"
+	}
+]
