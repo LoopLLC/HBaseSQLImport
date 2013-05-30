@@ -35,6 +35,7 @@ java HBaseSQLImport.jar
 *	-hbcf	HBase Column Family
 *	-hbq	HBase Column Qualifier*	-hbl	HBase Logical Column Name
 *	-hbd	HBase Column Description
+*	-hbn	HBase Nested Column (denormalized rows)
 *	-show [-format]
 *	-delete
 *	-import

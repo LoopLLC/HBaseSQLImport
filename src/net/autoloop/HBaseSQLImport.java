@@ -42,6 +42,7 @@ public class HBaseSQLImport {
 	public HBaseSQLImport() {}
 
 	private HTable htable;
+ 	private HBaseDescription d;
 
 	void run(String[] args) throws Exception {
 		
@@ -56,10 +57,11 @@ public class HBaseSQLImport {
 		boolean isDelete = false;
 		boolean isFormatted = false;
 		boolean isSqlDescribe = false;
+		boolean isImport = false;
 		String sqlTable = null;
 		String sqlSchema = null;
 
-		HBaseDescription d = new HBaseDescription();
+		this.d = new HBaseDescription();
 		HBaseColumn c = new HBaseColumn();
 		d.setHbaseColumn(c);
 
@@ -119,18 +121,26 @@ public class HBaseSQLImport {
 					sqlSchema = args[++i];
 					sqlTable = args[++i];
 					break;
+				case "-hbn":
+					c.setIsNested(true);
+					break;
+				case "-import":
+					isImport = true;
+					break;
 				default: break;
 			}
 		}
 		
 		if (isSave) {
-			save(d);
+			saveMapping();
 		} else if (isShow) {
-			show(d, showQuery, isFormatted);
+			show(showQuery, isFormatted);
 		} else if (isDelete) {
-			delete(d);
+			deleteMapping();
 		} else if (isSqlDescribe) {
 			sqlDescribe(sqlSchema, sqlTable); // TODO - Connection string
+		} else if (isImport) {
+			importSQL();	
 		} else {
 			usage();
 		}
@@ -147,24 +157,40 @@ public class HBaseSQLImport {
 		
 	}
 	
-	void delete(HBaseDescription d) throws Exception {
-		List<Delete> list = new ArrayList<>();
+	void deleteMapping() throws Exception {
+		List<Delete> list = new ArrayList< >();
 		String rowKey = d.getRowKey();
 		Delete del = new Delete(rowKey.getBytes());
 		list.add(del);
         this.htable.delete(list);
 	}
 	
-	void show(HBaseDescription d, boolean showQuery, 
-			boolean isFormatted) throws Exception {
+	/**
+	  * Show information about the schema mapping.
+	  */
+	void show(boolean showQuery, boolean isFormatted) throws Exception {
 		
 		if (d.getQueryName() == null) {
 			System.out.println("Missing -qn QueryName");
 			usage();
 			return;
 		}
+
+		ResultScanner ss = getSchemaScanner();
 		
-		// Show all info regarding that Query
+		if (isFormatted) {
+			showFormatted(ss);
+		} else {
+			showRaw(ss, showQuery);
+		}
+		
+	}
+
+	/**
+	  * Get a scanner that returns all rows matching QueryName.
+	  */
+	ResultScanner getSchemaScanner() {
+
 		Scan s = new Scan();
 		byte[] cf = Bytes.toBytes("d");
 		byte[] a = Bytes.toBytes("qn");
@@ -181,7 +207,8 @@ public class HBaseSQLImport {
 		list.addFilter(tableFilter);
 		
 		// Get the column maps
-		RegexStringComparator comp = new RegexStringComparator("^" + d.getQueryName() + "_*");   
+		RegexStringComparator comp = 
+			new RegexStringComparator("^" + d.getQueryName() + "_*");   
 		SingleColumnValueFilter columnFilter = new SingleColumnValueFilter(
 			cf,
 			a,
@@ -193,14 +220,12 @@ public class HBaseSQLImport {
 		s.setFilter(list);
 		
 		ResultScanner ss = this.htable.getScanner(s);
-		if (isFormatted) {
-			showFormatted(ss);
-		} else {
-			showRaw(ss, showQuery);
-		}
-		
+		return ss;
 	}
 	
+	/**
+	  * Show raw information for the rows matching QueryName.
+	  */
 	void showRaw(ResultScanner ss, boolean showQuery) {
 		
 		for(Result r:ss){
@@ -226,7 +251,28 @@ public class HBaseSQLImport {
 			}
 		}
 	}
+
+	/**
+	  * Get all schema columns matching the QueryName.
+	  */
+	List<HBaseDescription> getSchemaColumns(ResultScanner rs) {
+
+		List<HBaseDescription> columns = new ArrayList< >();
+		for(Result r:ss) {
+			HBaseDescription d = HBaseDescription.fromResult(r);
+			if (d.getType() ==  null) {
+				System.out.println("Missing ty Type");
+				continue;
+			}
+			columns.add(d);
+		}
+		return columns;
+
+	}
 	
+	/**
+	  * Show formatted information for the rows matching QueryName.
+	  */
 	void showFormatted(ResultScanner ss) {
 		/*
 		 * Query Name: Companies
@@ -242,13 +288,9 @@ public class HBaseSQLImport {
 		 */
 		
 		HBaseDescription tableDescription = null;
-		List<HBaseDescription> columns = new ArrayList<>();
-		for(Result r:ss) {
-			HBaseDescription d = HBaseDescription.fromResult(r);
-			if (d.getType() ==  null) {
-				System.out.println("Missing ty Type");
-				continue;
-			}
+		List<HBaseDescription> list = getSchemaColumns(ss);
+		List<HBaseDescription> columns = new List< >();
+		for (HBaseDescription d:list) {
 			if (d.getType().equals("Table")) {
 				tableDescription = d;
 			} else {
@@ -268,36 +310,39 @@ public class HBaseSQLImport {
 		
 		for (HBaseDescription d:columns) {
 			HBaseColumn c = d.getHbaseColumn();
-			System.out.format("%s: %s = %s.%s%n\t%s%n", 
+			System.out.format("%s: %s = %s.%s %s%n\t%s%n", 
 					c.getLogicalName(), 
 					c.getSqlName(), 
 					c.getColumnFamily(), 
 					c.getQualifier(), 
+					c.getIsNested() ? " (nested) " : "",
 					c.getDescription());
 		}
 		
 	}
 	
-	void save(HBaseDescription d) throws Exception {
+	/**
+	  * Save a schema mapping to HBase.
+	  */
+	void saveMapping() throws Exception {
 		
 		d.validate();
 		
-		putDescription(d);
+		putDescription();
 		
 		System.out.println("Wrote the description to HBase");
 	}
 	
 	/**
-	 * Write a SQL->HBase map description to HBase.
+	 * Write a SQL to HBase map description to HBase.
 	 * 
-	 * @param table
 	 * @param d
 	 * @throws IOException 
 	 */
-	private void putDescription(HBaseDescription d) throws IOException {
+	private void putDescription() throws IOException {
 		
 		HBaseColumn c = d.getHbaseColumn();
-		HashMap<String, String> values = new HashMap<>();
+		HashMap<String, String> values = new HashMap< >();
 		 
 		values.put("qn", d.getQueryName());
 		values.put("hbt", d.getTableName());
@@ -315,11 +360,12 @@ public class HBaseSQLImport {
 				values.put("hbq", c.getQualifier());
 				values.put("hbl", c.getLogicalName());
 				values.put("hbd", c.getDescription());
+				values.put("hbn", c.getIsNested() ? "true" : "false");
 				break;
 			default: break;
 		}
 		
-		put(this.htable, d.getRowKey(), "d", values);
+		put(d.getRowKey(), "d", values);
 	}
 	
 	private void put( 
@@ -337,7 +383,7 @@ public class HBaseSQLImport {
 		
 	}
 	
-	private void put(HTable table, 
+	private void put( 
 			String rowKey, 
 			String columnFamily, 
 			HashMap<String, String> values) throws IOException {
@@ -357,24 +403,23 @@ public class HBaseSQLImport {
 		
 	}
 
+  /**
+    * Describe a table in SQL Server.
+    */
 	private void sqlDescribe(String schema, String table) {
-		// Create a variable for the connection String.
+
 		String connectionUrl = "jdbc:sqlserver://engineering25:1433;"
 				+ "databaseName=LoopEzb_A_01;user=hadoop;password=password";
 
-		// Declare the JDBC objects.
 		Connection con = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 
 		try {
-			// Establish the connection.
 			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
 			con = DriverManager.getConnection(connectionUrl);
 
-			// Create and execute an SQL statement that returns some data.
-			
-			byte[] encoded = Files.readAllBytes(Paths.get("Sql/describe.sql"));
+			byte[] encoded = Files.readAllBytes(Paths.get("sql/describe.sql"));
 			String SQL = StandardCharsets.UTF_8
 							.decode(ByteBuffer.wrap(encoded)).toString();
 					
@@ -385,13 +430,13 @@ public class HBaseSQLImport {
 
 			ResultSetMetaData rsmd = rs.getMetaData();
 			int numColumns = rsmd.getColumnCount();
-			List<String> columnNames = new ArrayList<>();
+			List<String> columnNames = new ArrayList< >();
 			for (int i = 1 ; i <= numColumns; i++) {
 				columnNames.add(rsmd.getColumnName(i));
 			}
 			
 			System.out.format("%s.%s%n", schema, table);
-			// Iterate through the data in the result set and display it.
+
 			while (rs.next()) {
 				String lenstr = "";
                 String length = rs.getString("Length");
@@ -408,7 +453,7 @@ public class HBaseSQLImport {
                         isPk ? "PK" : "");
 			}
 
-		} // Handle any errors that may have occurred.
+		} 
 		catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -433,8 +478,90 @@ public class HBaseSQLImport {
 		}
 
 	}
+
+	/**
+	* Run the import SQL and write the data to HBase.
+	*/
+	private void importSQL() throws Exception {
+
+		// Get the table description and the list of columns
+		HBaseDescription tableDescription = null;
+		List<HBaseDescription> list = getSchemaColumns(ss);
+		HashMap<String, HBaseColumn> columns = new HashMap< >();
+		for (HBaseDescription d:list) {
+			if (d.getType().equals("Table")) {
+				tableDescription = d;
+			} else {
+				HBaseColumn c = d.getHBaseColumn();
+				columns.put(c.getSqlName(), c);
+			}
+		}
+
+		// TODO - Specify cx on command line
+		String connectionUrl = "jdbc:sqlserver://engineering25:1433;"
+				+ "databaseName=LoopEzb_A_01;user=hadoop;password=password";
+
+		System.out.format("Using connectionUrl: %s%n", 
+				connectionUrl);
+
+		Connection con = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+
+		// Execute the SQL stored in schema.d.q
+		try {
+			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+			con = DriverManager.getConnection(connectionUrl);
+
+			String sql = tableDescription.getQuery(); 
+
+			System.out.format("Running the following query:%n%s%n", sql);
+					
+			stmt = con.prepareStatement(sql);
+			rs = stmt.executeQuery();
+
+			ResultSetMetaData rsmd = rs.getMetaData();
+			int numColumns = rsmd.getColumnCount();
+			List<String> columnNames = new ArrayList< >();
+			for (int i = 1 ; i <= numColumns; i++) {
+				columnNames.add(rsmd.getColumnName(i));
+			}
+			
+			while (rs.next()) {
+				// TODO
+				// Iterate through each row
+
+				// Use mapping information to decide where to put each field value
+			}
+
+		} 
+		catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (Exception e) {
+				}
+			}
+			if (stmt != null) {
+				try {
+					stmt.close();
+				} catch (Exception e) {
+				}
+			}
+			if (con != null) {
+				try {
+					con.close();
+				} catch (Exception e) {
+				}
+			}
+		}
+
+
+	}
 	
-	private static void usage() {
+	private void usage() {
 		System.out.println("java HBaseSQLImport.jar");
 		System.out.println("\t-qn\tQueryName");
 		System.out.println("\t-q\tQueryFile");
@@ -442,11 +569,15 @@ public class HBaseSQLImport {
 		System.out.println("\t-c\tSQL Column Name");
 		System.out.println("\t-k\tSQL Key");
 		System.out.println("\t-hbt\tHBase Table");
-		System.out.println("\t-hbcf\tHBase Column Family");
-		System.out.println("\t-hbq\tHBase Attribute");
-		System.out.println("\t-hbl\tHBase Logical Column Name");
-		System.out.println("\t-hbd\tHBase Column Description");
+
 		System.out.println("\t-save\tSave a mapping description");
+		
+		System.out.println("\t\t-hbcf\tHBase Column Family");
+		System.out.println("\t\t-hbq\tHBase Attribute");
+		System.out.println("\t\t-hbl\tHBase Logical Column Name");
+		System.out.println("\t\t-hbd\tHBase Column Description");
+		System.out.println("\t\t-hbn\tA nested column");
+
 		System.out.println("\t-show\tShow a mapping description");
 		System.out.println("\t-format\tFormat the output from -show");
 		System.out.println("\t-sqld\tDescribe a table in SQL Server");

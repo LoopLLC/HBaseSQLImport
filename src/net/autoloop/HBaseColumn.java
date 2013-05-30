@@ -11,6 +11,7 @@ public class HBaseColumn {
 	protected String logicalName;
 	protected String description;
 	protected String sqlName;
+	protected boolean isNested;
 	
 	public void validate(String type) throws Exception {
 		
@@ -27,6 +28,14 @@ public class HBaseColumn {
 				break;
 			default: throw new Exception("Unexpected type");
 		}
+	}
+
+	public boolean getIsNested() { 
+		return this.isNested;
+	}
+
+	public void setIsNested(boolean isNested) {
+		this.isNested = isNested;
 	}
 
 	/**

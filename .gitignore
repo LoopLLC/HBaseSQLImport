@@ -2,5 +2,5 @@ nbproject/private/
 /build
 /dist
 *.swp
-
+.DS_Store
 

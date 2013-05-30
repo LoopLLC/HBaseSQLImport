@@ -11,17 +11,6 @@ import org.apache.hadoop.hbase.client.Result;
  * 
  * Describes a mapping from a SQL column or table to the HBase schema.
  * 
- *	qn - QueryName - "Trigger Notifications"
-	q - Query - "select ..."
-	c - Column - IsASRProEnabled
-	k - Key - CompanyId
-	hbt - HBaseTable - company
-	hbcf - HBaseCF - d
-	hbq - HBaseAttr - asr
-	hbk - HBaseKey - cid
-	hbl - HBaseLogicalName - CompanyId
-	hbd - HBaseDescription - The unique ID of the company
-	
  * @author ericzbeard
  */
 public class HBaseDescription {
@@ -65,7 +54,7 @@ public class HBaseDescription {
 				case "qn": // Query Name
 					d.setQueryName(value);
 					break;
-				case "q": // Query File
+				case "q": // The SQL query
 					d.setQuery(value);
 					break;
 				case "k":
@@ -91,6 +80,13 @@ public class HBaseDescription {
 					break;
 				case "ty":
 					d.setType(value);
+					break;
+				case "hbn":
+					if ("true".equals(value)) {
+						c.setIsNested(true);
+					} else {
+						c.setIsNested(false);
+					}
 					break;
 				default: break;
 			}
