@@ -189,7 +189,7 @@ public class HBaseSQLImport {
 	/**
 	  * Get a scanner that returns all rows matching QueryName.
 	  */
-	ResultScanner getSchemaScanner() {
+	ResultScanner getSchemaScanner() throws Exception {
 
 		Scan s = new Scan();
 		byte[] cf = Bytes.toBytes("d");
@@ -255,7 +255,7 @@ public class HBaseSQLImport {
 	/**
 	  * Get all schema columns matching the QueryName.
 	  */
-	List<HBaseDescription> getSchemaColumns(ResultScanner rs) {
+	List<HBaseDescription> getSchemaColumns(ResultScanner ss) {
 
 		List<HBaseDescription> columns = new ArrayList< >();
 		for(Result r:ss) {
@@ -289,7 +289,7 @@ public class HBaseSQLImport {
 		
 		HBaseDescription tableDescription = null;
 		List<HBaseDescription> list = getSchemaColumns(ss);
-		List<HBaseDescription> columns = new List< >();
+		List<HBaseDescription> columns = new ArrayList< >();
 		for (HBaseDescription d:list) {
 			if (d.getType().equals("Table")) {
 				tableDescription = d;
@@ -352,7 +352,6 @@ public class HBaseSQLImport {
 			case "Table":
 				values.put("q", d.getQuery());
 				values.put("k", d.getSqlKey());
-				values.put("hbk", c.getSqlName());
 				break;
 			case "Column":
 				values.put("c", c.getSqlName());
@@ -371,12 +370,12 @@ public class HBaseSQLImport {
 	private void put( 
 			String rowKey, 
 			String columnFamily, 
-			String attribute, 
+			String qualifier, 
 			String value) throws IOException {
 		
 		Put p = new Put(Bytes.toBytes(rowKey));
 		
-		p.add(Bytes.toBytes(columnFamily), Bytes.toBytes(attribute), 
+		p.add(Bytes.toBytes(columnFamily), Bytes.toBytes(qualifier), 
 				Bytes.toBytes(value));
 		
 		this.htable.put(p);
@@ -391,10 +390,10 @@ public class HBaseSQLImport {
 		Put p = new Put(Bytes.toBytes(rowKey));
 		for (Map.Entry<String, String> kvp : values.entrySet()) {
       
-			String attribute = kvp.getKey();
+			String qualifier = kvp.getKey();
 			String v = kvp.getValue();
 			if (v == null) continue;
-			p.add(Bytes.toBytes(columnFamily), Bytes.toBytes(attribute), 
+			p.add(Bytes.toBytes(columnFamily), Bytes.toBytes(qualifier), 
 				Bytes.toBytes(v));
 			
 		}
@@ -403,9 +402,9 @@ public class HBaseSQLImport {
 		
 	}
 
-  /**
-    * Describe a table in SQL Server.
-    */
+	/**
+     * Describe a table in SQL Server.
+     */
 	private void sqlDescribe(String schema, String table) {
 
 		String connectionUrl = "jdbc:sqlserver://engineering25:1433;"
@@ -480,19 +479,19 @@ public class HBaseSQLImport {
 	}
 
 	/**
-	* Run the import SQL and write the data to HBase.
-	*/
+	 * Run the import SQL and write the data to HBase.
+	 */
 	private void importSQL() throws Exception {
 
 		// Get the table description and the list of columns
 		HBaseDescription tableDescription = null;
-		List<HBaseDescription> list = getSchemaColumns(ss);
+		List<HBaseDescription> list = getSchemaColumns(getSchemaScanner());
 		HashMap<String, HBaseColumn> columns = new HashMap< >();
 		for (HBaseDescription d:list) {
 			if (d.getType().equals("Table")) {
 				tableDescription = d;
 			} else {
-				HBaseColumn c = d.getHBaseColumn();
+				HBaseColumn c = d.getHbaseColumn();
 				columns.put(c.getSqlName(), c);
 			}
 		}
@@ -510,6 +509,7 @@ public class HBaseSQLImport {
 
 		// Execute the SQL stored in schema.d.q
 		try {
+
 			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
 			con = DriverManager.getConnection(connectionUrl);
 
@@ -520,19 +520,66 @@ public class HBaseSQLImport {
 			stmt = con.prepareStatement(sql);
 			rs = stmt.executeQuery();
 
+			// Ask the result set for column meta-data, and cross-check 
+			// this against the mappings that are stored in HBase.
 			ResultSetMetaData rsmd = rs.getMetaData();
 			int numColumns = rsmd.getColumnCount();
-			List<String> columnNames = new ArrayList< >();
+			HashMap<String, Integer> columnNames = new HashMap< >();
 			for (int i = 1 ; i <= numColumns; i++) {
-				columnNames.add(rsmd.getColumnName(i));
+				String columnName = rsmd.getColumnName(i);
+				HBaseColumn hbColumn = columns.get(columnName);
+				if (hbColumn == null) {
+					System.out.println("Could not find " + columnName + 
+							"in HBase schema mapping");
+				} else {
+					System.out.println("Adding " + columnName + 
+							" to column name list");
+					columnNames.put(columnName, rsmd.getColumnType(i));
+				}
 			}
-			
+
 			while (rs.next()) {
-				// TODO
-				// Iterate through each row
+
+				// The row key for the row in HBase is the value of the 
+				// field with the column name "sqlKey" from the HBase
+				// schema mapping table description.  e.g. in the Companies
+				// query, CompanyId is designated as the SQL Key for each row.
+				// TODO - Handle composite keys.  If sqlKey is something like:
+				// {CompanyId}_{NotificationRunId}_{NotificationId}, the 
+				// row key will be something like 1_Guid_Guid.
+				String sqlKey = tableDescription.getSqlKey();
+				String rowKey = rs.getString(sqlKey);
+				
+				if (rs.wasNull()) {
+					throw new Exception("The field for sqlKey " + 
+							sqlKey + 
+							" was null");
+				}
+
+				Put p = new Put(Bytes.toBytes(rowKey));
 
 				// Use mapping information to decide where to put each field value
+				for (Map.Entry<String, Integer> kvp : columnNames.entrySet()) {
+			  
+					String columnName = kvp.getKey();
+					int columnType = kvp.getValue();
+					HBaseColumn hbColumn = columns.get(columnName);
+					String columnFamily = hbColumn.getColumnFamily();
+					String qualifier = hbColumn.getQualifier();
+
+					p.add(  Bytes.toBytes(columnFamily), 
+							Bytes.toBytes(qualifier), 
+							convertSqlValueToHBase(
+								columnType, 
+								rs, 
+								columnName) );
+
+					// TODO - If the value is null, what should we do?
+					// Do a delete instead to remove the value?
+				}
+				this.htable.put(p);
 			}
+			
 
 		} 
 		catch (Exception e) {
@@ -559,6 +606,71 @@ public class HBaseSQLImport {
 		}
 
 
+	}
+
+	/**
+	 * Convert a value from the SQL result set to a byte array
+	 * for the HBase put.
+	 *
+	 * If the SQL value was NULL, an empty byte array is returned.
+	 */
+	byte[] convertSqlValueToHBase(
+			int columnType, 
+			ResultSet rs, 
+			String columnName) throws Exception {
+
+		byte[] nullArray = new byte[0];
+
+		// TODO - Seems like there should be a less verbose way to do this.
+
+		switch (columnType) {
+			case Types.INTEGER:
+				int i = rs.getInt(columnName);
+				if (rs.wasNull()) {
+					return nullArray;
+				}
+				return Bytes.toBytes(i);
+			case Types.BIGINT:
+				long l = rs.getLong(columnName);
+				if (rs.wasNull()) {
+					return nullArray;
+				}
+				return Bytes.toBytes(l);
+			case Types.VARCHAR:
+				String s = rs.getString(columnName);
+				if (rs.wasNull()) {
+					return nullArray;
+				}
+				return Bytes.toBytes(s);
+			case Types.BIT:
+			case Types.BOOLEAN:
+				boolean b = rs.getBoolean(columnName);
+				if (rs.wasNull()) {
+					return nullArray;
+				}
+				return Bytes.toBytes(b);
+			case Types.DOUBLE:
+				double d = rs.getDouble(columnName);
+				if (rs.wasNull()) {
+					return nullArray;
+				}
+				return Bytes.toBytes(d);
+			case Types.FLOAT:
+				float f = rs.getFloat(columnName);
+				if (rs.wasNull()) {
+					return nullArray;
+				}
+				return Bytes.toBytes(f);
+			case Types.TINYINT:
+				byte by = rs.getByte(columnName);
+				if (rs.wasNull()) {
+					return nullArray;
+				}
+				byte[] ba = new byte[1];
+				ba[0] = by;
+				return ba;
+			default: throw new Exception("Unexpected SQL type: " + columnType);
+		}	
 	}
 	
 	private void usage() {

@@ -20,10 +20,12 @@ public class HBaseColumn {
 				break;
 			case "Column":
 				if (this.columnFamily == null) {
-					throw new Exception("-hbc HBaseCF must be given for -ty Column");
+					throw new Exception(
+							"-hbc HBaseCF must be given for -ty Column");
 				}
 				if (this.qualifier == null) {
-					throw new Exception("-hbq HBaseQualifier must be given for -ty Column");
+					throw new Exception(
+							"-hbq HBaseQualifier must be given for -ty Column");
 				}
 				break;
 			default: throw new Exception("Unexpected type");
