@@ -131,14 +131,19 @@ public class HBaseSQLImport {
 			}
 		}
 		
+		if (isSqlDescribe) {
+			sqlDescribe(sqlSchema, sqlTable); // TODO - Connection string
+			return;
+		}
+	
+		initHbase();
+		
 		if (isSave) {
 			saveMapping();
 		} else if (isShow) {
 			show(showQuery, isFormatted);
 		} else if (isDelete) {
 			deleteMapping();
-		} else if (isSqlDescribe) {
-			sqlDescribe(sqlSchema, sqlTable); // TODO - Connection string
 		} else if (isImport) {
 			importSQL();	
 		} else {
