@@ -126,14 +126,23 @@ public class HBaseHelper {
 		switch (dataType) {
 			case "int": return java.sql.Types.INTEGER;
 			case "long": return java.sql.Types.BIGINT;
-			case "String": return java.sql.Types.VARCHAR;
+			case "string": return java.sql.Types.VARCHAR;
 			case "double": return java.sql.Types.DOUBLE;
 			case "float": return java.sql.Types.FLOAT;
 			case "boolean": return java.sql.Types.BIT;
 			case "byte": return java.sql.Types.TINYINT;
+			case "datetime": return java.sql.Types.DATETIME;
 			default: return 0;
 		}
 		// TODO - Convert this to a dictionary
+
+		// TODO - Document "HBSQLI Type" - "Java Type" - "SQL Type"
+
+		// A Java type or SQL type could appear multiple times, 
+		// depending on how we want to interpret the value.
+
+		// e.g. "int" = "Java int" = "sql INTEGER"
+		//		"int2" = "Java int" = "sql SMALLINT"
 	}
 }
 

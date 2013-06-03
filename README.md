@@ -29,7 +29,17 @@ java HBaseSQLImport.jar
 *	-c	SQL Column Name
 
 	Maps a SQL column name from the import script.
+
+*	-t	Column Data Type
+
+	int, String, boolean, byte, double, float, DateTime
 	
+	These type names are generic and not necessarily targeted to a single language.
+	
+	SQL equivalents:
+	
+	INTEGER, VARCHAR, BIT, TINYINT, DOUBLE, FLOAT, DATETIME
+		
 *	-k	SQL Key
 *	-hbt	HBase Table
 *	-hbcf	HBase Column Family
