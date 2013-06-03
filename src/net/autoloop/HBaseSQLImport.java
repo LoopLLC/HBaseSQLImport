@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package net.autoloop;
 
 import java.io.IOException;
@@ -22,6 +18,11 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import java.sql.*;
+
+import com.google.gson.*;
+import com.google.gson.reflect.*;
+
+import java.lang.reflect.*;
 
 /**
  *
@@ -160,6 +161,21 @@ public class HBaseSQLImport {
 		
 		this.htable = new HTable(config, "schema");
 		
+	}
+
+	void parseSchemaFile(String path) throws Exception {
+		byte[] encoded = Files.readAllBytes(Paths.get(path));
+		String json = StandardCharsets.UTF_8
+						.decode(ByteBuffer.wrap(encoded)).toString();
+		Type collectionType = 
+			new TypeToken<Collection<HBaseJsonSchema>>(){}.getType();
+		Gson gson = new Gson();
+		Collection<HBaseJsonSchema> list = gson.fromJson(json, collectionType);
+		for (HBaseJsonSchema s:list) {
+			HBaseDescription d = s.getDescription();
+		}
+
+		// TODO - Create list and save them all to HBase
 	}
 	
 	void deleteMapping() throws Exception {
