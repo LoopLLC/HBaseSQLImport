@@ -1,9 +1,5 @@
 package net.autoloop;
 
-import org.apache.hadoop.hbase.KeyValue;
-import org.apache.hadoop.hbase.client.Result;
-import org.apache.hadoop.hbase.util.Bytes;
-
 /**
  * 
  * Describes a mapping from a SQL column or table to the HBase schema.
@@ -19,83 +15,6 @@ public class HBaseDescription {
 	protected String type;
 	protected HBaseColumn hbaseColumn;
 	
-	public static HBaseDescription fromResult(Result r) {
-		HBaseDescription d = new HBaseDescription();
-		HBaseColumn c = new HBaseColumn();
-		d.setHbaseColumn(c);
-		
-		/*
-		 *  
-			Companies hbt company
-			Companies k CompanyId
-			Companies q [SQL Query not shown, use -query to see it]
-			Companies qn Companies
-			* 
-			* or
-			* 
-			Companies_CompanyName c CompanyName
-			Companies_CompanyName t 12
-			Companies_CompanyName hbcf d
-			Companies_CompanyName hbd The name of the company
-			Companies_CompanyName hbl CompanyName
-			Companies_CompanyName hbq cn
-			Companies_CompanyName hbt company
-			Companies_CompanyName qn Companies
-		 */
-		
-		String rowKey = new String(r.getRow());
-		
-		for (KeyValue kv:r.raw()) {
-			String qualifier = new String(kv.getQualifier());
-			String value = new String(kv.getValue());
-			switch (qualifier) {
-				case "qn": // Query Name
-					d.setQueryName(value);
-					break;
-				case "q": // The SQL query
-					d.setQuery(value);
-					break;
-				case "k":
-					d.setSqlKey(value);
-					break;
-				case "hbt":
-					d.setTableName(value);
-					break;
-				case "hbcf":
-					c.setColumnFamily(value);
-					break;
-				case "hbq":
-					c.setQualifier(value);
-					break;
-				case "c":
-					c.setSqlColumnName(value);
-					break;
-				case "t":
-					c.setSqlType(Bytes.toInt(kv.getValue()));
-					break;
-				case "hbl":
-					c.setLogicalName(value);
-					break;
-				case "hbd":
-					c.setDescription(value);
-					break;
-				case "ty":
-					d.setType(value);
-					break;
-				case "hbn":
-					if ("true".equals(value)) {
-						c.setIsNested(true);
-					} else {
-						c.setIsNested(false);
-					}
-					break;
-				default: break;
-			}
-		}
-		
-		return d;
-	}
-
 	public void validate() throws Exception {
 		
 		if (this.tableName == null) {

@@ -112,7 +112,7 @@ public class HBaseSQLImport {
 					c.setSqlColumnName(args[++i]);
 					break;
 				case "-t":
-					c.setSqlType(Integer.parseInt(args[++i]));
+					c.setDataType(args[++i]);
 					break;
 				case "-hbl":
 					c.setLogicalName(args[++i]);
@@ -232,10 +232,9 @@ public class HBaseSQLImport {
 		Gson gson = new Gson();
 		Collection<HBaseJsonSchema> list = gson.fromJson(json, collectionType);
 		for (HBaseJsonSchema s:list) {
-			HBaseDescription d = s.getDescription();
+			HBaseDescription d = HBaseHelper.getDescriptionFromJsonSchema(s);
+			putDescription(d);
 		}
-
-		// TODO - Create list and save them all to HBase
 	}
 	
 	/**
@@ -345,7 +344,7 @@ public class HBaseSQLImport {
 
 		List<HBaseDescription> columns = new ArrayList< >();
 		for(Result r:ss) {
-			HBaseDescription d = HBaseDescription.fromResult(r);
+			HBaseDescription d = HBaseHelper.getDescriptionFromResult(r);
 			if (d.getType() ==  null) {
 				System.out.println("Missing ty Type");
 				continue;
@@ -367,7 +366,7 @@ public class HBaseSQLImport {
 		 * 
 		 * Columns:
 		 * 
-		 * Company Name: CompanyName = d.cn
+		 * Company Name: CompanyName = d.cn (String)
 		 *     The name of the company
 		 * 
 		 * Column 2: ....
@@ -396,12 +395,13 @@ public class HBaseSQLImport {
 		
 		for (HBaseDescription d:columns) {
 			HBaseColumn c = d.getHbaseColumn();
-			System.out.format("%s: %s = %s.%s %s%n\t%s%n", 
+			System.out.format("%s: %s = %s.%s %s (%s) %n\t%s%n", 
 					c.getLogicalName(), 
 					c.getSqlColumnName(), 
 					c.getColumnFamily(), 
 					c.getQualifier(), 
 					c.getIsNested() ? " (nested) " : "",
+					c.getDataType(),
 					c.getDescription());
 		}
 		
@@ -441,6 +441,7 @@ public class HBaseSQLImport {
 				break;
 			case "Column":
 				values.put("c", c.getSqlColumnName());
+				values.put("t", c.getDataType());
 				values.put("hbcf", c.getColumnFamily());
 				values.put("hbq", c.getQualifier());
 				values.put("hbl", c.getLogicalName());
@@ -527,6 +528,8 @@ public class HBaseSQLImport {
 
 	/**
      * Describe a table in SQL Server.
+	 * 
+	 * Optionally generate SQL queries for the table.
      */
 	private void sqlDescribe(String schema, String table, boolean generate) {
 
@@ -675,11 +678,12 @@ public class HBaseSQLImport {
 				int rsType = rsmd.getColumnType(i);
 
 				// Make sure the java.sql.Types value matches
-				if (rsType != hbColumn.getSqlType()) {
+				if (rsType != HBaseHelper
+						.getJavaSqlDataType(hbColumn.getDataType())) {
 					System.out.println("Result Set Type " + 
 							rsType + 
 							" does not match HB schema type " + 
-							hbColumn.getSqlType() + 
+							hbColumn.getDataType() + 
 							" for column " + 
 						   columnName);
 					continue;	
@@ -836,6 +840,7 @@ public class HBaseSQLImport {
 		System.out.println("\t-q\tQueryFile");
 		System.out.println("\t-ty\tType (Table or Column)");
 		System.out.println("\t-c\tSQL Column Name");
+		System.out.println("\t-t\tData Type (int, String, boolean, float, double, byte)");
 		System.out.println("\t-k\tSQL Key");
 		System.out.println("\t-hbt\tHBase Table");
 
