@@ -10,7 +10,8 @@ public class HBaseColumn {
 	protected String qualifier;
 	protected String logicalName;
 	protected String description;
-	protected String sqlName;
+	protected String sqlColumnName;
+	protected int sqlType;
 	protected boolean isNested;
 	
 	public void validate(String type) throws Exception {
@@ -27,9 +28,25 @@ public class HBaseColumn {
 					throw new Exception(
 							"-hbq HBaseQualifier must be given for -ty Column");
 				}
+				if (this.sqlType == 0) {
+					throw new Exception(
+							"-t SQL Type must be set for -ty Column");
+				}
+				if (this.sqlColumnName == null) {
+					throw new Exception(
+							"-c SQL Column Name must be set for -ty Column");
+				}
 				break;
 			default: throw new Exception("Unexpected type");
 		}
+	}
+
+	public int getSqlType() {
+		return this.sqlType;
+	}
+
+	public void setSqlType(int t) {
+		this.sqlType = t;
 	}
 
 	public boolean getIsNested() { 
@@ -97,16 +114,16 @@ public class HBaseColumn {
 	}
 
 	/**
-	 * @return the sqlName
+	 * @return the sqlColumnName
 	 */
-	public String getSqlName() {
-		return sqlName;
+	public String getSqlColumnName() {
+		return sqlColumnName;
 	}
 
 	/**
-	 * @param sqlName the sqlName to set
+	 * @param sqlName the sqlColumnName to set
 	 */
-	public void setSqlName(String sqlName) {
-		this.sqlName = sqlName;
+	public void setSqlColumnName(String sqlColumnName) {
+		this.sqlColumnName = sqlColumnName;
 	}
 }

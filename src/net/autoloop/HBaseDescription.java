@@ -2,6 +2,7 @@ package net.autoloop;
 
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.util.Bytes;
 
 /**
  * 
@@ -33,6 +34,7 @@ public class HBaseDescription {
 			* or
 			* 
 			Companies_CompanyName c CompanyName
+			Companies_CompanyName t 12
 			Companies_CompanyName hbcf d
 			Companies_CompanyName hbd The name of the company
 			Companies_CompanyName hbl CompanyName
@@ -66,7 +68,10 @@ public class HBaseDescription {
 					c.setQualifier(value);
 					break;
 				case "c":
-					c.setSqlName(value);
+					c.setSqlColumnName(value);
+					break;
+				case "t":
+					c.setSqlType(Bytes.toInt(kv.getValue()));
 					break;
 				case "hbl":
 					c.setLogicalName(value);
@@ -135,7 +140,7 @@ public class HBaseDescription {
 		if (this.type != null && this.type.equals("Table")) {
 			return this.queryName;
 		} else {
-			return this.queryName + "_" + this.hbaseColumn.getSqlName();
+			return this.queryName + "_" + this.hbaseColumn.getSqlColumnName();
 		}
 	}
 	

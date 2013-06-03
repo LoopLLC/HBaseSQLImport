@@ -1,5 +1,8 @@
 package net.autoloop;
 
+import java.util.*;
+import java.io.*;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -10,8 +13,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.commons.io.*;
 
-import java.util.*;
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.filter.*;
 import org.apache.log4j.Level;
@@ -43,8 +46,15 @@ public class HBaseSQLImport {
 	public HBaseSQLImport() {}
 
 	private HTable htable;
- 	private HBaseDescription d;
+	private String connectionString;
+	private String sqlHost;
+	private String sqlDatabase;
+	private String sqlUser;
+	private String sqlPassword;
 
+	/**
+	 * Run the application.
+	 */
 	void run(String[] args) throws Exception {
 		
 		if (args.length == 0) {
@@ -58,34 +68,39 @@ public class HBaseSQLImport {
 		boolean isDelete = false;
 		boolean isFormatted = false;
 		boolean isSqlDescribe = false;
+		boolean isSqlGenerate = false;
 		boolean isImport = false;
 		String sqlTable = null;
 		String sqlSchema = null;
 
-		this.d = new HBaseDescription();
+		// The HBase "schema" table can hold the table description or the column description.
+		// Both have "qn" and "ty", so HBaseDescription + HBaseColumn are used to 
+		// represent a row.
+		HBaseDescription description = new HBaseDescription();
 		HBaseColumn c = new HBaseColumn();
-		d.setHbaseColumn(c);
+		description.setHbaseColumn(c);
 
+		// Parse command line args
 		for (int i = 0; i < args.length; i++) {
 			String arg = args[i].toLowerCase();
 			switch (arg) {
 				case "-qn": // Query Name
-					d.setQueryName(args[++i]);
+					description.setQueryName(args[++i]);
 					break;
 				case "-q": // Query File
 					String queryFile = args[++i];
 					byte[] encoded = Files.readAllBytes(Paths.get(queryFile));
-					d.setQuery(StandardCharsets.UTF_8
+					description.setQuery(StandardCharsets.UTF_8
 							.decode(ByteBuffer.wrap(encoded)).toString());
 					break;
-				case "-ty":
-					d.setType(args[++i]);
+				case "-ty": // Schema row type "Table" or "Column"
+					description.setType(args[++i]);
 					break;
 				case "-k":
-					d.setSqlKey(args[++i]);
+					description.setSqlKey(args[++i]);
 					break;
 				case "-hbt":
-					d.setTableName(args[++i]);
+					description.setTableName(args[++i]);
 					break;
 				case "-hbcf":
 					c.setColumnFamily(args[++i]);
@@ -94,7 +109,10 @@ public class HBaseSQLImport {
 					c.setQualifier(args[++i]);
 					break;
 				case "-c":
-					c.setSqlName(args[++i]);
+					c.setSqlColumnName(args[++i]);
+					break;
+				case "-t":
+					c.setSqlType(Integer.parseInt(args[++i]));
 					break;
 				case "-hbl":
 					c.setLogicalName(args[++i]);
@@ -122,6 +140,21 @@ public class HBaseSQLImport {
 					sqlSchema = args[++i];
 					sqlTable = args[++i];
 					break;
+				case "-sqlg":
+					isSqlGenerate = true;
+					break;
+				case "-sqlh":
+					this.sqlHost = args[++i];
+					break;
+				case "-sqlu":
+					this.sqlUser = args[++i];
+					break;
+				case "-sqldb":
+					this.sqlDatabase = args[++i];
+					break;
+				case "-sqlp":
+					this.sqlPassword = args[++i];
+					break;
 				case "-hbn":
 					c.setIsNested(true);
 					break;
@@ -131,28 +164,52 @@ public class HBaseSQLImport {
 				default: break;
 			}
 		}
+
+		if (isSqlDescribe || isImport) {
+				
+			if (this.sqlHost == null || this.sqlUser == null || 
+					this.sqlPassword == null || this.sqlDatabase == null) {
+				System.out.println("Missing SQL arguments");
+				usage();
+				return;
+			}
+
+			// Get the SQL password if we need to connect to SQL Server.
+			// Only do this if the password wasn't already provided.
+			if (sqlPassword == null) {
+				sqlPassword = readPassword();
+			}
+
+			createConnectionString();
+
+		}
 		
 		if (isSqlDescribe) {
-			sqlDescribe(sqlSchema, sqlTable); // TODO - Connection string
+			sqlDescribe(sqlSchema, sqlTable, isSqlGenerate);
 			return;
 		}
 	
+		// If we get to here we will need to connect to HBase
+
 		initHbase();
 		
 		if (isSave) {
-			saveMapping();
+			saveMapping(description);
 		} else if (isShow) {
-			show(showQuery, isFormatted);
+			show(description, showQuery, isFormatted);
 		} else if (isDelete) {
-			deleteMapping();
+			deleteMapping(description);
 		} else if (isImport) {
-			importSQL();	
+			importSQL(description);	
 		} else {
 			usage();
 		}
 		
 	}
 
+	/**
+	 * Initialize HBase configuration.
+	 */
 	void initHbase() throws Exception {
 
 		Configuration config = HBaseConfiguration.create();
@@ -163,6 +220,9 @@ public class HBaseSQLImport {
 		
 	}
 
+	/**
+	 * Parse the JSON schema file and make entries in the HBase schema table.
+	 */
 	void parseSchemaFile(String path) throws Exception {
 		byte[] encoded = Files.readAllBytes(Paths.get(path));
 		String json = StandardCharsets.UTF_8
@@ -178,26 +238,30 @@ public class HBaseSQLImport {
 		// TODO - Create list and save them all to HBase
 	}
 	
-	void deleteMapping() throws Exception {
+	/**
+	 * Delete an entry from the HBase schema table.
+	 */
+	void deleteMapping(HBaseDescription description) throws Exception {
 		List<Delete> list = new ArrayList< >();
-		String rowKey = d.getRowKey();
+		String rowKey = description.getRowKey();
 		Delete del = new Delete(rowKey.getBytes());
 		list.add(del);
         this.htable.delete(list);
 	}
 	
 	/**
-	  * Show information about the schema mapping.
-	  */
-	void show(boolean showQuery, boolean isFormatted) throws Exception {
+	 * Show information about the schema mapping.
+	 */
+	void show(HBaseDescription description, 
+			boolean showQuery, boolean isFormatted) throws Exception {
 		
-		if (d.getQueryName() == null) {
+		if (description.getQueryName() == null) {
 			System.out.println("Missing -qn QueryName");
 			usage();
 			return;
 		}
 
-		ResultScanner ss = getSchemaScanner();
+		ResultScanner ss = getSchemaScanner(description);
 		
 		if (isFormatted) {
 			showFormatted(ss);
@@ -208,9 +272,9 @@ public class HBaseSQLImport {
 	}
 
 	/**
-	  * Get a scanner that returns all rows matching QueryName.
-	  */
-	ResultScanner getSchemaScanner() throws Exception {
+	 * Get a scanner that returns all rows matching QueryName.
+	 */
+	ResultScanner getSchemaScanner(HBaseDescription description) throws Exception {
 
 		Scan s = new Scan();
 		byte[] cf = Bytes.toBytes("d");
@@ -223,13 +287,13 @@ public class HBaseSQLImport {
 			cf,
 			a,
 			CompareFilter.CompareOp.EQUAL, 
-			Bytes.toBytes(d.getQueryName())
+			Bytes.toBytes(description.getQueryName())
 		);
 		list.addFilter(tableFilter);
 		
 		// Get the column maps
 		RegexStringComparator comp = 
-			new RegexStringComparator("^" + d.getQueryName() + "_*");   
+			new RegexStringComparator("^" + description.getQueryName() + "_*");   
 		SingleColumnValueFilter columnFilter = new SingleColumnValueFilter(
 			cf,
 			a,
@@ -245,8 +309,8 @@ public class HBaseSQLImport {
 	}
 	
 	/**
-	  * Show raw information for the rows matching QueryName.
-	  */
+	 * Show raw information for the rows matching QueryName.
+	 */
 	void showRaw(ResultScanner ss, boolean showQuery) {
 		
 		for(Result r:ss){
@@ -266,7 +330,8 @@ public class HBaseSQLImport {
 					if (!qualifier.equals("q")) {
 						 System.out.println(new String(kv.getValue()));
 					} else {
-						System.out.println("[SQL Query not shown, use -query to see it]");
+						System.out.println(
+								"[SQL Query not shown, use -query to see it]");
 					}
 				}
 			}
@@ -333,7 +398,7 @@ public class HBaseSQLImport {
 			HBaseColumn c = d.getHbaseColumn();
 			System.out.format("%s: %s = %s.%s %s%n\t%s%n", 
 					c.getLogicalName(), 
-					c.getSqlName(), 
+					c.getSqlColumnName(), 
 					c.getColumnFamily(), 
 					c.getQualifier(), 
 					c.getIsNested() ? " (nested) " : "",
@@ -345,11 +410,11 @@ public class HBaseSQLImport {
 	/**
 	  * Save a schema mapping to HBase.
 	  */
-	void saveMapping() throws Exception {
+	void saveMapping(HBaseDescription description) throws Exception {
 		
-		d.validate();
+		description.validate();
 		
-		putDescription();
+		putDescription(description);
 		
 		System.out.println("Wrote the description to HBase");
 	}
@@ -360,7 +425,7 @@ public class HBaseSQLImport {
 	 * @param d
 	 * @throws IOException 
 	 */
-	private void putDescription() throws IOException {
+	private void putDescription(HBaseDescription d) throws IOException {
 		
 		HBaseColumn c = d.getHbaseColumn();
 		HashMap<String, String> values = new HashMap< >();
@@ -375,7 +440,7 @@ public class HBaseSQLImport {
 				values.put("k", d.getSqlKey());
 				break;
 			case "Column":
-				values.put("c", c.getSqlName());
+				values.put("c", c.getSqlColumnName());
 				values.put("hbcf", c.getColumnFamily());
 				values.put("hbq", c.getQualifier());
 				values.put("hbl", c.getLogicalName());
@@ -388,6 +453,9 @@ public class HBaseSQLImport {
 		put(d.getRowKey(), "d", values);
 	}
 	
+	/**
+	 * Write a single value to HBase.
+	 */
 	private void put( 
 			String rowKey, 
 			String columnFamily, 
@@ -403,6 +471,9 @@ public class HBaseSQLImport {
 		
 	}
 	
+	/**
+	 * Write a collection of values to an HBase row.
+	 */
 	private void put( 
 			String rowKey, 
 			String columnFamily, 
@@ -424,12 +495,42 @@ public class HBaseSQLImport {
 	}
 
 	/**
+	 * Get a password from the user, suppressing command line echo.
+	 */
+	String readPassword() {
+		Console cons;
+ 		char[] passwd;
+		String retval = null;
+  		if ((cons = System.console()) != null &&
+		    (passwd = cons.readPassword("[%s]", "SQL Server Password:")) != null) {
+				retval = new String(passwd);	
+				java.util.Arrays.fill(passwd, ' ');
+		}
+		return retval;
+	}
+
+	/**
+	 * Create the connection string used to connect to SQL Server.
+	 */
+	void createConnectionString() {
+
+
+		this.connectionString = "jdbc:sqlserver://" + 
+			this.sqlHost + ":1433;databaseName=" + 
+			this.sqlDatabase + 
+			";user=" + 
+			this.sqlUser + 
+			";password=" + 
+			this.sqlPassword;
+
+	}
+
+	/**
      * Describe a table in SQL Server.
      */
-	private void sqlDescribe(String schema, String table) {
+	private void sqlDescribe(String schema, String table, boolean generate) {
 
-		String connectionUrl = "jdbc:sqlserver://engineering25:1433;"
-				+ "databaseName=LoopEzb_A_01;user=hadoop;password=password";
+		//System.out.println(connectionUrl);
 
 		Connection con = null;
 		PreparedStatement stmt = null;
@@ -437,13 +538,14 @@ public class HBaseSQLImport {
 
 		try {
 			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-			con = DriverManager.getConnection(connectionUrl);
+			con = DriverManager.getConnection(this.connectionString);
 
-			byte[] encoded = Files.readAllBytes(Paths.get("sql/describe.sql"));
-			String SQL = StandardCharsets.UTF_8
-							.decode(ByteBuffer.wrap(encoded)).toString();
-					
-			stmt = con.prepareStatement(SQL);
+			String resourcesPath = "resources/describe.sql";
+			InputStream stream = this.getClass()
+				.getResourceAsStream(resourcesPath);
+			String sql = IOUtils.toString(stream, "UTF-8");
+
+			stmt = con.prepareStatement(sql);
 			stmt.setString(1, schema);
 			stmt.setString(2, table);
 			rs = stmt.executeQuery();
@@ -457,10 +559,14 @@ public class HBaseSQLImport {
 			
 			System.out.format("%s.%s%n", schema, table);
 
+			StringBuffer selectSql = new StringBuffer();
+			selectSql.append(String.format("select %n")); 
+
+			boolean first = true;
 			while (rs.next()) {
 				String lenstr = "";
                 String length = rs.getString("Length");
-                if (!rs.wasNull())
+                if (!rs.wasNull() && !"".equals(length))
                 {
                   lenstr = "(" + length + ")";
                 }
@@ -471,6 +577,21 @@ public class HBaseSQLImport {
                         lenstr, 
                         rs.getString("Nullable"), 
                         isPk ? "PK" : "");
+
+				if (generate) {
+					selectSql.append("\t");
+					if (!first) selectSql.append(",");
+					selectSql.append(String.format("%s%n", rs.getString("Name")));
+				}
+				first = false;
+			}
+
+			System.out.println();
+
+			if (generate) {
+				selectSql.append(String.format("from %s.%s%n;%n", 
+						schema, table));
+				System.out.println(selectSql.toString());
 			}
 
 		} 
@@ -502,27 +623,21 @@ public class HBaseSQLImport {
 	/**
 	 * Run the import SQL and write the data to HBase.
 	 */
-	private void importSQL() throws Exception {
+	private void importSQL(HBaseDescription description) throws Exception {
 
 		// Get the table description and the list of columns
 		HBaseDescription tableDescription = null;
-		List<HBaseDescription> list = getSchemaColumns(getSchemaScanner());
+		List<HBaseDescription> list = 
+			getSchemaColumns(getSchemaScanner(description));
 		HashMap<String, HBaseColumn> columns = new HashMap< >();
 		for (HBaseDescription d:list) {
 			if (d.getType().equals("Table")) {
 				tableDescription = d;
 			} else {
 				HBaseColumn c = d.getHbaseColumn();
-				columns.put(c.getSqlName(), c);
+				columns.put(c.getSqlColumnName(), c);
 			}
 		}
-
-		// TODO - Specify cx on command line
-		String connectionUrl = "jdbc:sqlserver://engineering25:1433;"
-				+ "databaseName=LoopEzb_A_01;user=hadoop;password=password";
-
-		System.out.format("Using connectionUrl: %s%n", 
-				connectionUrl);
 
 		Connection con = null;
 		PreparedStatement stmt = null;
@@ -532,7 +647,7 @@ public class HBaseSQLImport {
 		try {
 
 			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-			con = DriverManager.getConnection(connectionUrl);
+			con = DriverManager.getConnection(this.connectionString);
 
 			String sql = tableDescription.getQuery(); 
 
@@ -549,14 +664,31 @@ public class HBaseSQLImport {
 			for (int i = 1 ; i <= numColumns; i++) {
 				String columnName = rsmd.getColumnName(i);
 				HBaseColumn hbColumn = columns.get(columnName);
+
+				// Make sure we have this column in the HBase schema table
 				if (hbColumn == null) {
 					System.out.println("Could not find " + columnName + 
 							"in HBase schema mapping");
-				} else {
-					System.out.println("Adding " + columnName + 
-							" to column name list");
-					columnNames.put(columnName, rsmd.getColumnType(i));
+					continue;
 				}
+
+				int rsType = rsmd.getColumnType(i);
+
+				// Make sure the java.sql.Types value matches
+				if (rsType != hbColumn.getSqlType()) {
+					System.out.println("Result Set Type " + 
+							rsType + 
+							" does not match HB schema type " + 
+							hbColumn.getSqlType() + 
+							" for column " + 
+						   columnName);
+					continue;	
+				}
+
+				System.out.println("Adding " + columnName + 
+						" to column name list");
+
+				columnNames.put(columnName, rsType);
 			}
 
 			while (rs.next()) {
@@ -568,6 +700,7 @@ public class HBaseSQLImport {
 				// TODO - Handle composite keys.  If sqlKey is something like:
 				// {CompanyId}_{NotificationRunId}_{NotificationId}, the 
 				// row key will be something like 1_Guid_Guid.
+
 				String sqlKey = tableDescription.getSqlKey();
 				String rowKey = rs.getString(sqlKey);
 				
@@ -694,6 +827,9 @@ public class HBaseSQLImport {
 		}	
 	}
 	
+	/**
+	 * Output usage to the console.
+	 */
 	private void usage() {
 		System.out.println("java HBaseSQLImport.jar");
 		System.out.println("\t-qn\tQueryName");
@@ -713,7 +849,12 @@ public class HBaseSQLImport {
 
 		System.out.println("\t-show\tShow a mapping description");
 		System.out.println("\t-format\tFormat the output from -show");
+		System.out.println();
+
 		System.out.println("\t-sqld\tDescribe a table in SQL Server");
+		System.out.println("\t-sqlh\tSQL Host");
+		System.out.println("\t-sqldb\tSQL Database Name");
+		System.out.println("\t-sqlu\tSQL Username");
 		System.out.println("");
 	}
 }
