@@ -1,5 +1,7 @@
 package net.autoloop;
 
+import org.apache.commons.lang.*;
+
 /**
  * 
  * Describes a mapping from a SQL column or table to the HBase schema.
@@ -17,30 +19,34 @@ public class HBaseDescription {
 	
 	public void validate() throws Exception {
 		
-		if (this.tableName == null) {
-			throw new Exception("-hbt HBaseTable must be given");
-		}
-		
-		if (this.queryName == null) {
+		if (StringUtils.isBlank(this.queryName)) {
 			throw new Exception("-qn QueryName is required");
 		}
 		
-		if (this.type == null) {
+		if (StringUtils.isBlank(this.type)) {
 			throw new Exception("-ty Type is required (Table or Column)");
 		}
 		
 		switch (this.type) {
 			case "Table":
-				if (this.query == null) {
-					throw new Exception("-q QueryFile must be given for -ty Table");
+				if (StringUtils.isBlank(this.query)) {
+					throw new Exception(
+							"-q QueryFile must be given for -ty Table");
 				}
-				if (this.sqlKey == null) {
-					throw new Exception("-k SQLKey must be given for -ty Table");
+				if (StringUtils.isBlank(this.sqlKey)) {
+					throw new Exception(
+							"-k SQLKey must be given for -ty Table");
 				}
+				if (StringUtils.isBlank(this.tableName)) {
+					throw new Exception(
+							"-hbt HBaseTable must be given for -ty Table");
+				}
+		
 				break;
 			case "Column":
 				break;
-			default: throw new Exception("Unexpected type, should be Table or Column");
+			default: throw new Exception(
+					"Unexpected type, should be Table or Column");
 		}
 		
 		if (this.hbaseColumn == null) {

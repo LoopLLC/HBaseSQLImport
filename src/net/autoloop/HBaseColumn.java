@@ -1,5 +1,8 @@
 package net.autoloop;
 
+import org.apache.commons.lang.*;
+import java.util.*;
+
 /**
  * Describes a column in HBase.
  * 
@@ -20,22 +23,34 @@ public class HBaseColumn {
 			case "Table":
 				break;
 			case "Column":
-				if (this.columnFamily == null) {
+				if (StringUtils.isBlank(this.columnFamily)) {
 					throw new Exception(
-							"-hbc HBaseCF must be given for -ty Column");
+						"-hbc HBaseCF must be given for -ty Column");
 				}
-				if (this.qualifier == null) {
+				if (StringUtils.isBlank(this.qualifier)) {
 					throw new Exception(
-							"-hbq HBaseQualifier must be given for -ty Column");
+					"-hbq HBaseQualifier must be given for -ty Column");
 				}
-				if (this.dataType == null) {
+				if (StringUtils.isBlank(this.dataType)) {
 					throw new Exception(
-							"-t SQL Type must be set for -ty Column");
+						"-t SQL Type must be set for -ty Column");
 				}
-				// TODO - Validate dataType value
-				if (this.sqlColumnName == null) {
+				List<String> validTypes = new ArrayList<>();
+				validTypes.add("int");
+				validTypes.add("string");
+				validTypes.add("nstring");
+				validTypes.add("boolean");
+				validTypes.add("long");
+				validTypes.add("float");
+				validTypes.add("double");
+				validTypes.add("datetime");
+				validTypes.add("byte");
+				if (!validTypes.contains(this.dataType)) {
+					throw new Exception("Invalid -t SQL Type");
+				}
+				if (StringUtils.isBlank(this.sqlColumnName)) {
 					throw new Exception(
-							"-c SQL Column Name must be set for -ty Column");
+						"-c SQL Column Name must be set for -ty Column");
 				}
 				break;
 			default: throw new Exception("Unexpected type");

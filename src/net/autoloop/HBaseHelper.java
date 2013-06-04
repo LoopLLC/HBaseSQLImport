@@ -92,7 +92,8 @@ public class HBaseHelper {
 	/**
 	 * Convert a JSON facade object to a description object.
 	 */
-	public static HBaseDescription getDescriptionFromJsonSchema(HBaseJsonSchema j) {
+	public static HBaseDescription 
+		getDescriptionFromJsonSchema(HBaseJsonSchema j) {
 
 		HBaseDescription d = new HBaseDescription();
 		HBaseColumn c = new HBaseColumn();
@@ -127,11 +128,12 @@ public class HBaseHelper {
 			case "int": return java.sql.Types.INTEGER;
 			case "long": return java.sql.Types.BIGINT;
 			case "string": return java.sql.Types.VARCHAR;
+			case "nstring": return java.sql.Types.NVARCHAR;
 			case "double": return java.sql.Types.DOUBLE;
 			case "float": return java.sql.Types.FLOAT;
 			case "boolean": return java.sql.Types.BIT;
 			case "byte": return java.sql.Types.TINYINT;
-			case "datetime": return java.sql.Types.DATETIME;
+			case "datetime": return java.sql.Types.TIMESTAMP;
 			default: return 0;
 		}
 		// TODO - Convert this to a dictionary
