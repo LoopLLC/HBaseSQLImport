@@ -885,6 +885,12 @@ public class HBaseSQLImport {
 					return nullArray;
 				}
 				return Bytes.toBytes(i);
+			case Types.SMALLINT:
+				int sh = rs.getShort(columnName);
+				if (rs.wasNull()) {
+					return nullArray;
+				}
+				return Bytes.toBytes(sh);
 			case Types.BIGINT:
 				long l = rs.getLong(columnName);
 				if (rs.wasNull()) {
@@ -893,6 +899,7 @@ public class HBaseSQLImport {
 				return Bytes.toBytes(l);
 			case Types.VARCHAR:
 			case Types.NVARCHAR:
+			case Types.CHAR:
 				String s = rs.getString(columnName);
 				if (rs.wasNull()) {
 					return nullArray;
@@ -930,7 +937,7 @@ public class HBaseSQLImport {
 				if (rs.wasNull()) {
 					return nullArray;
 				}
-				return Bytes.toBytes(date.getTime());
+				return Bytes.toBytes(date.getTime()); // long
 			default: throw new Exception(
 						"Unexpected SQL type: " + columnType);
 		}	

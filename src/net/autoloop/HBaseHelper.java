@@ -125,15 +125,17 @@ public class HBaseHelper {
 	 */
 	public static int getJavaSqlDataType(String dataType) {
 		switch (dataType) {
-			case "int": return java.sql.Types.INTEGER;
-			case "long": return java.sql.Types.BIGINT;
-			case "string": return java.sql.Types.VARCHAR;
-			case "nstring": return java.sql.Types.NVARCHAR;
-			case "double": return java.sql.Types.DOUBLE;
-			case "float": return java.sql.Types.FLOAT;
-			case "boolean": return java.sql.Types.BIT;
-			case "byte": return java.sql.Types.TINYINT;
-			case "datetime": return java.sql.Types.TIMESTAMP;
+			case "int": return java.sql.Types.INTEGER; // int
+			case "long": return java.sql.Types.BIGINT; // long
+			case "string": return java.sql.Types.VARCHAR; // String
+			case "nstring": return java.sql.Types.NVARCHAR; // String
+			case "double": return java.sql.Types.DOUBLE; // double
+			case "float": return java.sql.Types.FLOAT; // float
+			case "boolean": return java.sql.Types.BIT; // boolean
+			case "byte": return java.sql.Types.TINYINT; // byte
+			case "datetime": return java.sql.Types.TIMESTAMP; // Date (long)
+			case "guid": return java.sql.Types.CHAR; // String
+			case "short": return java.sql.Types.SMALLINT; // short
 			default: return 0;
 		}
 		// TODO - Convert this to a dictionary

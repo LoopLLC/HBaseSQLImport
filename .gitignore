@@ -3,4 +3,5 @@ nbproject/private/
 /dist
 *.swp
 .DS_Store
+/tmp
 
