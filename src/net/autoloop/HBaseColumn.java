@@ -45,6 +45,8 @@ public class HBaseColumn {
 				validTypes.add("double");
 				validTypes.add("datetime");
 				validTypes.add("byte");
+				validTypes.add("guid");
+				validTypes.add("short");
 				if (!validTypes.contains(this.dataType)) {
 					throw new Exception("Invalid -t SQL Type");
 				}

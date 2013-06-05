@@ -261,17 +261,33 @@ public class HBaseSQLImport {
 		Collection<HBaseJsonSchema> list = 
 			gson.fromJson(json, collectionType);
 
+		List<String> qualifiers = new ArrayList<>();
+
 		// Save each description to the HBase schema table
 		for (HBaseJsonSchema s:list) {
 			HBaseDescription d = 
 				HBaseHelper.getDescriptionFromJsonSchema(s);
 
+			// Validate the description
 			try {
 				d.validate();
 			} catch (Exception ex) {
 				System.out.println("Invalid description: " + 
 						ex.getMessage());
 				continue;
+			}
+
+			// Make sure the file doesn't have duplicate hbq
+			if (d.getType().equals("Column")) {
+				String qualifier = d.getHbaseColumn().getQualifier();
+				if (qualifiers.contains(qualifier)) {
+					System.out.println("Non-unique hbq: " + 
+							qualifier + 
+							", exiting");
+					return;
+				} else {
+					qualifiers.add(qualifier);
+				}
 			}
 			
 			System.out.println("Saving " + d.getType() + 
@@ -456,7 +472,7 @@ public class HBaseSQLImport {
 		
 		for (HBaseDescription d:columns) {
 			HBaseColumn c = d.getHbaseColumn();
-			System.out.format("%s: %s = %s.%s %s (%s) %n\t%s%n", 
+			System.out.format("%s: %s = %s.%s %s (%s) %n\t%s%n%n", 
 					c.getLogicalName(), 
 					c.getSqlColumnName(), 
 					c.getColumnFamily(), 

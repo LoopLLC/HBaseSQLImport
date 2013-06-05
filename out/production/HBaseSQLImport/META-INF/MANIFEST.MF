@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Class-Path: slf4j-api-1.4.3.jar gson-2.2.4.jar protobuf-java-2.4.0a.ja
+ r log4j-1.2.15.jar hadoop-core-1.1.2.jar hbase-0.94.7.jar commons-log
+ ging-1.1.1.jar commons-lang-2.4.jar zookeeper-3.4.5.jar commons-confi
+ guration-1.6.jar commons-io-2.1.jar slf4j-log4j12-1.4.3.jar
+Main-Class: net.autoloop.HBaseSQLImport
+

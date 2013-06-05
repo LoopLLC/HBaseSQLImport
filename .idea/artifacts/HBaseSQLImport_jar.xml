@@ -1,0 +1,11 @@
+<component name="ArtifactManager">
+  <artifact name="HBaseSQLImport:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/HBaseSQLImport_jar</output-path>
+    <root id="root">
+      <element id="archive" name="HBaseSQLImport.jar">
+        <element id="module-output" name="HBaseSQLImport" />
+      </element>
+      <element id="library" level="project" name="lib" />
+    </root>
+  </artifact>
+</component>
