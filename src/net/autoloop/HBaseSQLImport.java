@@ -72,6 +72,7 @@ public class HBaseSQLImport {
 		boolean isSqlGenerate = false;
 		boolean isImport = false;
 		boolean isSchema = false;
+		boolean isTest = false;
 		String schemaPath = null;
 		String sqlTable = null;
 		String sqlSchema = null;
@@ -170,6 +171,9 @@ public class HBaseSQLImport {
 					isSchema = true;
 					schemaPath = args[++i];
 					break;
+				case "-test":
+					isTest = true;
+					break;
 				default: break;
 			}
 		}
@@ -212,6 +216,8 @@ public class HBaseSQLImport {
 			importSQL(description);	
 		} else if (isSchema) {
 			parseSchemaFile(schemaPath);	
+		} else if (isTest) {
+			test();
 		} else {
 			usage();
 		}
@@ -469,6 +475,9 @@ public class HBaseSQLImport {
 		}
 		System.out.println();
 		System.out.println("Columns:");
+
+		// Sort by Logical Name
+		Collections.sort(columns);
 		
 		for (HBaseDescription d:columns) {
 			HBaseColumn c = d.getHbaseColumn();
@@ -759,7 +768,7 @@ public class HBaseSQLImport {
 				// Make sure we have this column in the HBase schema table
 				if (hbColumn == null) {
 					System.out.println("Could not find " + columnName + 
-							"in HBase schema mapping");
+							" in HBase schema mapping");
 					continue;
 				}
 
@@ -790,26 +799,12 @@ public class HBaseSQLImport {
 
 			while (rs.next()) {
 
-				// The row key for the row in HBase is the value of the 
-				// field with the column name "sqlKey" from the HBase
-				// schema mapping table description.  e.g. in the Companies
-				// query, CompanyId is designated as the SQL Key for 
-				// each row.
-				// TODO - Handle composite keys.  
-				// If sqlKey is something like:
-				// {CompanyId}_{NotificationRunId}_{NotificationId}, the 
-				// row key will be something like 1_Guid_Guid.
-
+				// Get the row key for the row in HBase
 				String sqlKey = tableDescription.getSqlKey();
-				String rowKey = rs.getString(sqlKey);
-				
-				if (rs.wasNull()) {
-					throw new Exception("The field for sqlKey " + 
-							sqlKey + 
-							" was null");
-				}
-
+				String rowKey = getRowKeyFromResultSet(sqlKey, rs);
 				byte[] rowKeyBytes = Bytes.toBytes(rowKey);
+
+				// Create a Put to hold the column values for this row
 				Put p = new Put(rowKeyBytes);
 
 				// Use mapping information to decide 
@@ -857,25 +852,63 @@ public class HBaseSQLImport {
 			e.printStackTrace();
 		} finally {
 			if (rs != null) {
-				try {
-					rs.close();
-				} catch (Exception e) {
-				}
+				try { rs.close(); } catch (Exception e) { }
 			}
 			if (stmt != null) {
-				try {
-					stmt.close();
-				} catch (Exception e) {
-				}
+				try { stmt.close(); } catch (Exception e) { }
 			}
 			if (con != null) {
-				try {
-					con.close();
-				} catch (Exception e) {
-				}
+				try { con.close(); } catch (Exception e) { }
 			}
 		}
 
+	}
+
+	/**
+	 * Get the HBase row key value from the ResultSet, 
+	 * using the sqlKey template.
+	 *
+	 * The sqlKey might be something simple like "CompanyId", 
+	 * in which case we just get CompanyId from the ResultSet.
+	 *
+	 * But it might be composite, like {CompanyId}_{NotificationRunId}
+	 */
+	String getRowKeyFromResultSet(String sqlKey, ResultSet rs) 
+		throws Exception {
+
+		String[] tokens = getRowKeyTokens(sqlKey);
+		StringBuffer sb = new StringBuffer();
+		boolean first = true;
+		for (String token:tokens) {
+		 	if (first) {
+				first = false;
+			} else {
+				sb.append("_");
+			}
+			sb.append(rs.getString(token));	
+			
+			if (rs.wasNull()) {
+				throw new Exception("The field for sqlKey " + 
+						sqlKey + 
+						" token " + 
+						token + 
+						" was null");
+			}
+		}
+		return sb.toString();
+
+	}
+
+	/**
+	 * Split the sqlKey into row key tokens.
+	 */
+	String[] getRowKeyTokens(String sqlKey) {
+
+		String[] tokens = sqlKey.split("\\}_\\{");
+		for (int i = 0; i < tokens.length; i++) {
+			tokens[i] = tokens[i].replace("{", "").replace("}", "");
+		}
+		return tokens;
 
 	}
 
@@ -993,5 +1026,17 @@ public class HBaseSQLImport {
 		System.out.println();
 		System.out.println("\t-schema JSON Schema File");
 		System.out.println("");
+	}
+
+	void test() {
+
+		// Test sqlKey token split
+		String sqlKey = "{CompanyId}_{NotificationRunId}_{NotificationId}";
+		System.out.println("Testing getRowKeyTokens " + sqlKey);
+		String[] tokens = getRowKeyTokens(sqlKey);
+		for (String token:tokens) {
+			System.out.println("token: " + token);
+		}
+
 	}
 }

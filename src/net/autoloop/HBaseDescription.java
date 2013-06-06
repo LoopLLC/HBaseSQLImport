@@ -8,7 +8,7 @@ import org.apache.commons.lang.*;
  * 
  * @author ericzbeard
  */
-public class HBaseDescription {
+public class HBaseDescription implements Comparable<HBaseDescription> {
 	
 	protected String queryName;
 	protected String query;
@@ -65,7 +65,43 @@ public class HBaseDescription {
 		if (this.type != null && this.type.equals("Table")) {
 			return this.queryName;
 		} else {
-			return this.queryName + "_" + this.hbaseColumn.getSqlColumnName();
+			return this.queryName + "_" + 
+				this.hbaseColumn.getSqlColumnName();
+		}
+	}
+
+	/**
+	 * Compare the description.  For sorting.
+	 */
+	public int compareTo(HBaseDescription that) {
+		if (that == null) return 1;
+
+		if (that.getType() == null && this.getType() == null) return 0;
+
+		if (that.getType() == null) return 1;
+
+		if (this.getType() == null) return -1;
+
+		// Sort Table before anything else
+		if (this.getType().equals("Table") && 
+			!that.getType().equals("Table")) {
+			return 1;
+		}
+
+		if (this.getType().equals("Table")) {
+			if (this.getTableName() == null && 
+				that.getTableName() == null) return 0;
+			if (this.getTableName() == null) return -1;
+			if (that.getTableName() == null) return 1;
+			return this.getTableName().compareTo(that.getTableName());
+		} else {
+			if (this.getHbaseColumn() == null && 
+				that.getHbaseColumn() == null) {
+				return 0;
+			}
+			if (that.getHbaseColumn() == null) return 1;
+			if (this.getHbaseColumn() == null) return -1;
+			return this.getHbaseColumn().compareTo(that.getHbaseColumn());
 		}
 	}
 	

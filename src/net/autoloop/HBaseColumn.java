@@ -8,7 +8,7 @@ import java.util.*;
  * 
  * @author ericzbeard
  */
-public class HBaseColumn {
+public class HBaseColumn implements Comparable<HBaseColumn> {
 	protected String columnFamily;
 	protected String qualifier;
 	protected String logicalName;
@@ -59,6 +59,19 @@ public class HBaseColumn {
 		}
 	}
 
+	/**
+	 * Compare to another column.  For sorting.
+	 *
+	 * Sorts by Logical Name
+	 */
+	public int compareTo(HBaseColumn that) {
+		if (that == null) return 1;
+		if (this.getLogicalName() == null && 
+			that.getLogicalName() == null) return 0;		
+		if (that.getLogicalName() == null) return 1;
+		if (this.getLogicalName() == null) return -1;
+		return this.getLogicalName().compareTo(that.getLogicalName());
+	}
 
 	public String getDataType() {
 		return this.dataType;
