@@ -148,5 +148,42 @@ public class HBaseHelper {
 		// e.g. "int" = "Java int" = "sql INTEGER"
 		//		"int2" = "Java int" = "sql SMALLINT"
 	}
+
+	/**
+	 * Convert a scan result to a dictionary object.
+	 */
+	public static HBaseDictionary getDictionaryFromResult(Result r) 
+		throws Exception {
+
+		HBaseDictionary d = new HBaseDictionary();
+
+		for (KeyValue kv:r.raw()) {
+			String qualifier = new String(kv.getQualifier());
+			String value = new String(kv.getValue());
+			switch (qualifier) {
+				case "table": 
+					d.setTable(value);
+					break;
+				case "family": 
+					d.setFamily(value);
+					break;
+				case "qualifier": 
+					d.setQualifier(value);
+					break;
+				case "name": 
+					d.setName(value);
+					break;
+				case "description": 
+					d.setDescription(value);
+					break;
+				case "nested": 
+					d.setNested(value);
+					break;
+				default: break;
+			}
+		}
+
+		return d;
+	}
 }
 

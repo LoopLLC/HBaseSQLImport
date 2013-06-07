@@ -46,7 +46,8 @@ public class HBaseSQLImport {
 	public HBaseSQLImport() {}
 
 	private Configuration config;
-	private HTable htable;
+	private HTable schemaTable;
+	private HTable dictionaryTable;
 	private String connectionString;
 	private String sqlHost;
 	private String sqlDatabase;
@@ -73,9 +74,11 @@ public class HBaseSQLImport {
 		boolean isImport = false;
 		boolean isSchema = false;
 		boolean isTest = false;
+		boolean isShowDictionary = false;
 		String schemaPath = null;
 		String sqlTable = null;
 		String sqlSchema = null;
+		String tableName = null;
 
 		// The HBase "schema" table can hold the table 
 		// description or the column description.
@@ -174,6 +177,10 @@ public class HBaseSQLImport {
 				case "-test":
 					isTest = true;
 					break;
+				case "-dictionary":
+					isShowDictionary = true;
+					tableName = args[++i];
+					break;
 				default: break;
 			}
 		}
@@ -218,6 +225,8 @@ public class HBaseSQLImport {
 			parseSchemaFile(schemaPath);	
 		} else if (isTest) {
 			test();
+		} else if (isShowDictionary) {
+			showDictionaryFormatted(tableName);
 		} else {
 			usage();
 		}
@@ -233,16 +242,9 @@ public class HBaseSQLImport {
 		
 		Logger.getRootLogger().setLevel(Level.WARN);
 		
-		this.htable = new HTable(config, "schema");
+		this.schemaTable = new HTable(config, "schema");
+		this.dictionaryTable = new HTable(config, "dictionary");
 		
-	}
-
-	/**
-	 * Set the current HBase table against which all operations
-	 * will happen.
-	 */
-	void setHbaseTable(String tableName) throws Exception {
-		this.htable = new HTable(config, tableName);
 	}
 
 	/**
@@ -323,7 +325,7 @@ public class HBaseSQLImport {
 		String rowKey = description.getRowKey();
 		Delete del = new Delete(rowKey.getBytes());
 		list.add(del);
-        this.htable.delete(list);
+        this.schemaTable.delete(list);
 	}
 	
 	/**
@@ -356,14 +358,15 @@ public class HBaseSQLImport {
 
 		Scan s = new Scan();
 		byte[] cf = Bytes.toBytes("d");
-		byte[] a = Bytes.toBytes("qn");
+		byte[] q = Bytes.toBytes("qn");
 		
-		FilterList list = new FilterList(FilterList.Operator.MUST_PASS_ONE);
+		FilterList list = 
+			new FilterList(FilterList.Operator.MUST_PASS_ONE);
 		
 		// Get the row for the table/query/keys
 		SingleColumnValueFilter tableFilter = new SingleColumnValueFilter(
 			cf,
-			a,
+			q,
 			CompareFilter.CompareOp.EQUAL, 
 			Bytes.toBytes(description.getQueryName())
 		);
@@ -373,17 +376,47 @@ public class HBaseSQLImport {
 		RegexStringComparator comp = 
 			new RegexStringComparator("^" + 
 					description.getQueryName() + "_*");   
-		SingleColumnValueFilter columnFilter = new SingleColumnValueFilter(
-			cf,
-			a,
-			CompareFilter.CompareOp.EQUAL,
-			comp
-			);
+		SingleColumnValueFilter columnFilter = 
+			new SingleColumnValueFilter(
+				cf,
+				q,
+				CompareFilter.CompareOp.EQUAL,
+				comp
+				);
 		list.addFilter(columnFilter);
 		
 		s.setFilter(list);
 		
-		ResultScanner ss = this.htable.getScanner(s);
+		ResultScanner ss = this.schemaTable.getScanner(s);
+		return ss;
+	}
+
+	/**
+	 * Get a scanner that returns all rows in dictionary
+	 * matching the table name.
+	 */
+	ResultScanner getDictionaryScanner(String tableName) 
+		throws Exception {
+
+		Scan s = new Scan();
+		byte[] cf = Bytes.toBytes("d");
+		byte[] q = Bytes.toBytes("table");
+		
+		FilterList list = 
+			new FilterList(FilterList.Operator.MUST_PASS_ONE);
+		
+		// Get the row for the table/query/keys
+		SingleColumnValueFilter tableFilter = new SingleColumnValueFilter(
+			cf,
+			q,
+			CompareFilter.CompareOp.EQUAL, 
+			Bytes.toBytes(tableName)
+		);
+		list.addFilter(tableFilter);
+		
+		s.setFilter(list);
+		
+		ResultScanner ss = this.dictionaryTable.getScanner(s);
 		return ss;
 	}
 	
@@ -433,6 +466,19 @@ public class HBaseSQLImport {
 		}
 		return columns;
 
+	}
+
+	/**
+	 * Get a list of dictionary objects from the scanner.
+	 */
+	List<HBaseDictionary> getDictionaryColumns(ResultScanner ss) 
+		throws Exception {
+		List<HBaseDictionary> columns = new ArrayList<>();
+		for (Result r:ss) {
+			HBaseDictionary d = HBaseHelper.getDictionaryFromResult(r);
+			columns.add(d);
+		}
+		return columns;
 	}
 	
 	/**
@@ -492,6 +538,31 @@ public class HBaseSQLImport {
 		}
 		
 	}
+
+	void showDictionaryFormatted(String tableName) throws Exception {
+
+		ResultScanner ss = getDictionaryScanner(tableName);
+		List<HBaseDictionary> list = getDictionaryColumns(ss);
+		Collections.sort(list);
+
+		for (HBaseDictionary d:list) {
+			String formatted = String.format(
+				"%s\t%s%n\t%s%n", 
+				padRight(d.getRowKey(), 30), 
+				d.getName(), 
+				d.getDescription());
+			System.out.println(formatted);
+		}
+	}
+
+	String padRight(String s, int totalWidth) {
+		StringBuffer sb = new StringBuffer();
+		sb.append(s);
+		while (sb.length() < totalWidth) {
+			sb.append(" ");
+		}
+		return sb.toString();
+	}
 	
 	/**
 	  * Save a schema mapping to HBase.
@@ -507,11 +578,13 @@ public class HBaseSQLImport {
 	
 	/**
 	 * Write a SQL to HBase map description to HBase.
+	 *
+	 * Writes query map to schema and table docs to dictionary.
 	 * 
 	 * @param d
 	 * @throws IOException 
 	 */
-	private void putDescription(HBaseDescription d) throws IOException {
+	private void putDescription(HBaseDescription d) throws Exception {
 		
 		HBaseColumn c = d.getHbaseColumn();
 		HashMap<String, String> values = new HashMap< >();
@@ -537,15 +610,59 @@ public class HBaseSQLImport {
 			default: break;
 		}
 		
-		put(d.getRowKey(), "d", values);
+		put(this.schemaTable, d.getRowKey(), "d", values);
+
+		System.out.println("Wrote " + d.getRowKey() + " to schema");
+
+		putDictionary(d);
+	}
+
+	/**
+	 * Save the column description to the data dictionary.
+	 */
+	void putDictionary(HBaseDescription d) throws Exception {
+		if (!d.getType().equals("Column")) {
+			return;
+		}
+
+		HBaseColumn c = d.getHbaseColumn();
+
+		// d.tableName is null for column descriptions, 
+		// to we need to look it up in the HBase schema table.
+		String tableName = getTableNameForQuery(d.getQueryName());
+		
+		HashMap<String, String> values = new HashMap< >();
+		values.put("table", tableName);
+		values.put("type", c.getDataType());
+		values.put("family", c.getColumnFamily());
+		values.put("qualifier", c.getQualifier());
+		values.put("name", c.getLogicalName());
+		values.put("description", c.getDescription());
+		values.put("nested", c.getIsNested() ? "true" : "false");
+
+		String rowKey = d.getTableName() + ":" + 
+		   c.getColumnFamily() + ":" + c.getQualifier();	
+
+		put(this.dictionaryTable, rowKey, "d", values);
+
+		System.out.println("Wrote " + rowKey + " to dictionary");
 	}
 	
 	/**
+	 * Get the table name (hbt) from the schema table for queryName.
+	 */
+	String getTableNameForQuery(String queryName) throws Exception {
+		Get get = new Get(Bytes.toBytes(queryName));
+		Result r = this.schemaTable.get(get);
+		return Bytes.toString(r.getValue(Bytes.toBytes("d"), 
+					Bytes.toBytes("hbt")));
+	}
+
+	/**
 	 * Write a single value to HBase.
-	 *
-	 * Uses this.htable
 	 */
 	private void put( 
+			HTable htable,
 			String rowKey, 
 			String columnFamily, 
 			String qualifier, 
@@ -556,16 +673,15 @@ public class HBaseSQLImport {
 		p.add(Bytes.toBytes(columnFamily), Bytes.toBytes(qualifier), 
 				Bytes.toBytes(value));
 		
-		this.htable.put(p);
+		htable.put(p);
 		
 	}
 	
 	/**
 	 * Write a collection of values to an HBase row.
-	 *
-	 * Uses this.htable
 	 */
 	private void put( 
+			HTable htable,
 			String rowKey, 
 			String columnFamily, 
 			HashMap<String, String> values) throws IOException {
@@ -581,7 +697,7 @@ public class HBaseSQLImport {
 			
 		}
 		
-		this.htable.put(p);
+		htable.put(p);
 		
 	}
 
@@ -736,8 +852,9 @@ public class HBaseSQLImport {
 			}
 		}
 
-		// Switch to the target table
-		setHbaseTable(tableDescription.getTableName());
+		// Create a reference to the target table
+		HTable htable = 
+			new HTable(this.config, tableDescription.getTableName());
 
 		Connection con = null;
 		PreparedStatement stmt = null;
@@ -841,7 +958,7 @@ public class HBaseSQLImport {
 
 				}
 
-				this.htable.put(p);
+				htable.put(p);
 				totalRowsSaved++;
 			}
 			
