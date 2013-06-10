@@ -11,6 +11,7 @@ public class HBaseDictionary implements Comparable<HBaseDictionary> {
 	String qualifier;
 	String name;
 	String description;
+	String type;
 	boolean nested;
 
 	public HBaseDictionary() {}
@@ -53,6 +54,9 @@ public class HBaseDictionary implements Comparable<HBaseDictionary> {
 
 	public String getDescription() { return this.description; }
 	public void setDescription(String s) { this.description = s; }
+
+	public String getType() { return this.type; }
+	public void setType(String s) { this.type = s; }
 
 	public boolean getNested() { return this.nested; }
 	public void setNested(boolean b) { this.nested = b; }

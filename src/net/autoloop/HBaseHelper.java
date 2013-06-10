@@ -179,6 +179,9 @@ public class HBaseHelper {
 				case "nested": 
 					d.setNested(value);
 					break;
+				case "type": 
+					d.setType(value);
+					break;
 				default: break;
 			}
 		}

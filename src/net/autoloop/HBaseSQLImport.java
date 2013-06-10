@@ -220,6 +220,11 @@ public class HBaseSQLImport {
 		} else if (isDelete) {
 			deleteMapping(description);
 		} else if (isImport) {
+			if (description.getQueryName() == null) {
+				System.out.println("Missing -qn QueryName");
+				usage();
+				return;
+			}
 			importSQL(description);	
 		} else if (isSchema) {
 			parseSchemaFile(schemaPath);	
@@ -272,9 +277,9 @@ public class HBaseSQLImport {
 		List<String> qualifiers = new ArrayList<>();
 
 		// Save each description to the HBase schema table
-		for (HBaseJsonSchema s:list) {
+		for (HBaseJsonSchema j:list) {
 			HBaseDescription d = 
-				HBaseHelper.getDescriptionFromJsonSchema(s);
+				HBaseHelper.getDescriptionFromJsonSchema(j);
 
 			// Validate the description
 			try {
@@ -539,6 +544,9 @@ public class HBaseSQLImport {
 		
 	}
 
+	/**
+	 * Show the data dictionary for the HBase table.
+	 */
 	void showDictionaryFormatted(String tableName) throws Exception {
 
 		ResultScanner ss = getDictionaryScanner(tableName);
@@ -547,9 +555,10 @@ public class HBaseSQLImport {
 
 		for (HBaseDictionary d:list) {
 			String formatted = String.format(
-				"%s\t%s%n\t%s%n", 
+				"%s\t%s (%s) %n\t%s%n", 
 				padRight(d.getRowKey(), 30), 
 				d.getName(), 
+				d.getType(),
 				d.getDescription());
 			System.out.println(formatted);
 		}
@@ -640,7 +649,7 @@ public class HBaseSQLImport {
 		values.put("description", c.getDescription());
 		values.put("nested", c.getIsNested() ? "true" : "false");
 
-		String rowKey = d.getTableName() + ":" + 
+		String rowKey = tableName + ":" + 
 		   c.getColumnFamily() + ":" + c.getQualifier();	
 
 		put(this.dictionaryTable, rowKey, "d", values);
@@ -960,6 +969,12 @@ public class HBaseSQLImport {
 
 				htable.put(p);
 				totalRowsSaved++;
+
+				if (totalRowsSaved % 1000 == 0) {
+					System.out.println(
+							"Saved " + totalRowsSaved + " rows so far...");
+				}
+					
 			}
 			
 			System.out.println("Done.  Saved " + totalRowsSaved + " rows");
@@ -1141,7 +1156,9 @@ public class HBaseSQLImport {
 		System.out.println("\t-sqldb\tSQL Database Name");
 		System.out.println("\t-sqlu\tSQL Username");
 		System.out.println();
-		System.out.println("\t-schema JSON Schema File");
+		System.out.println("\t-import FileName.sql -qn QueryName " + 
+				"-sqlh Host -sqlu User -sqldb Database");
+		System.out.println("\t-schema SchemaFile.json");
 		System.out.println("");
 	}
 
