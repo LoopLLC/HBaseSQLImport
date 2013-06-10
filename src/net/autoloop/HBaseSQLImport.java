@@ -556,7 +556,7 @@ public class HBaseSQLImport {
 		for (HBaseDictionary d:list) {
 			String formatted = String.format(
 				"%s\t%s (%s) %n\t%s%n", 
-				padRight(d.getRowKey(), 30), 
+				HBaseHelper.padRight(d.getRowKey(), 30, ' '), 
 				d.getName(), 
 				d.getType(),
 				d.getDescription());
@@ -564,14 +564,6 @@ public class HBaseSQLImport {
 		}
 	}
 
-	String padRight(String s, int totalWidth) {
-		StringBuffer sb = new StringBuffer();
-		sb.append(s);
-		while (sb.length() < totalWidth) {
-			sb.append(" ");
-		}
-		return sb.toString();
-	}
 	
 	/**
 	  * Save a schema mapping to HBase.
@@ -925,9 +917,17 @@ public class HBaseSQLImport {
 
 			while (rs.next()) {
 
-				// Get the row key for the row in HBase
+				// Get the template for the row key for the row in HBase
+				// e.g. "CompanyId" 
+				// e.g. "{CompanyId}_{NotificationRunId}_{NotificationId}
+				//
+				// Braces aren't really required for row keys but
+				// they are a good convention to indicate a composite.
 				String sqlKey = tableDescription.getSqlKey();
-				String rowKey = getRowKeyFromResultSet(sqlKey, rs);
+
+				// Get the key value based on the sqlKey template
+				String rowKey = HBaseHelper.getCompositeValue(
+						columnNames, rs, sqlKey, false);
 				byte[] rowKeyBytes = Bytes.toBytes(rowKey);
 
 				// Create a Put to hold the column values for this row
@@ -944,7 +944,16 @@ public class HBaseSQLImport {
 					String columnFamily = hbColumn.getColumnFamily();
 					String qualifier = hbColumn.getQualifier();
 
-					byte[] hbaseValue = convertSqlValueToHBase(
+					// Convert the raw qualifer to the actual one
+					// e.g. cpn_{SlotNumber}_Name = cpn_001_Name
+					qualifier = HBaseHelper.getCompositeValue(
+							columnNames, 
+							rs, 
+							qualifier, 
+							true);
+
+					byte[] hbaseValue = 
+						HBaseHelper.convertSqlValueToHBase(
 								columnType, 
 								rs, 
 								columnName);
@@ -970,6 +979,9 @@ public class HBaseSQLImport {
 				htable.put(p);
 				totalRowsSaved++;
 
+				// TODO - htable.setAutoFlush(false), 
+				// flush/commit later to speed things up
+
 				if (totalRowsSaved % 1000 == 0) {
 					System.out.println(
 							"Saved " + totalRowsSaved + " rows so far...");
@@ -994,134 +1006,6 @@ public class HBaseSQLImport {
 			}
 		}
 
-	}
-
-	/**
-	 * Get the HBase row key value from the ResultSet, 
-	 * using the sqlKey template.
-	 *
-	 * The sqlKey might be something simple like "CompanyId", 
-	 * in which case we just get CompanyId from the ResultSet.
-	 *
-	 * But it might be composite, like {CompanyId}_{NotificationRunId}
-	 */
-	String getRowKeyFromResultSet(String sqlKey, ResultSet rs) 
-		throws Exception {
-
-		String[] tokens = getRowKeyTokens(sqlKey);
-		StringBuffer sb = new StringBuffer();
-		boolean first = true;
-		for (String token:tokens) {
-		 	if (first) {
-				first = false;
-			} else {
-				sb.append("_");
-			}
-			sb.append(rs.getString(token));	
-			
-			if (rs.wasNull()) {
-				throw new Exception("The field for sqlKey " + 
-						sqlKey + 
-						" token " + 
-						token + 
-						" was null");
-			}
-		}
-		return sb.toString();
-
-	}
-
-	/**
-	 * Split the sqlKey into row key tokens.
-	 */
-	String[] getRowKeyTokens(String sqlKey) {
-
-		String[] tokens = sqlKey.split("\\}_\\{");
-		for (int i = 0; i < tokens.length; i++) {
-			tokens[i] = tokens[i].replace("{", "").replace("}", "");
-		}
-		return tokens;
-
-	}
-
-	/**
-	 * Convert a value from the SQL result set to a byte array
-	 * for the HBase put.
-	 *
-	 * If the SQL value was NULL, an empty byte array is returned.
-	 */
-	byte[] convertSqlValueToHBase(
-			int columnType, 
-			ResultSet rs, 
-			String columnName) throws Exception {
-
-		byte[] nullArray = new byte[0];
-
-		// TODO - Seems like there should be a less verbose way to do this.
-
-		switch (columnType) {
-			case Types.INTEGER:
-				int i = rs.getInt(columnName);
-				if (rs.wasNull()) {
-					return nullArray;
-				}
-				return Bytes.toBytes(i);
-			case Types.SMALLINT:
-				int sh = rs.getShort(columnName);
-				if (rs.wasNull()) {
-					return nullArray;
-				}
-				return Bytes.toBytes(sh);
-			case Types.BIGINT:
-				long l = rs.getLong(columnName);
-				if (rs.wasNull()) {
-					return nullArray;
-				}
-				return Bytes.toBytes(l);
-			case Types.VARCHAR:
-			case Types.NVARCHAR:
-			case Types.CHAR:
-				String s = rs.getString(columnName);
-				if (rs.wasNull()) {
-					return nullArray;
-				}
-				return Bytes.toBytes(s);
-			case Types.BIT:
-			case Types.BOOLEAN:
-				boolean b = rs.getBoolean(columnName);
-				if (rs.wasNull()) {
-					return nullArray;
-				}
-				return Bytes.toBytes(b);
-			case Types.DOUBLE:
-				double d = rs.getDouble(columnName);
-				if (rs.wasNull()) {
-					return nullArray;
-				}
-				return Bytes.toBytes(d);
-			case Types.FLOAT:
-				float f = rs.getFloat(columnName);
-				if (rs.wasNull()) {
-					return nullArray;
-				}
-				return Bytes.toBytes(f);
-			case Types.TINYINT:
-				byte by = rs.getByte(columnName);
-				if (rs.wasNull()) {
-					return nullArray;
-				}
-				byte[] ba = new byte[1];
-				ba[0] = by;
-				return ba;
-			case Types.TIMESTAMP:
-				java.util.Date date = rs.getDate(columnName);
-				if (rs.wasNull()) {
-					return nullArray;
-				}
-				return Bytes.toBytes(date.getTime()); // long
-			default: throw new Exception(
-						"Unexpected SQL type: " + columnType);
-		}	
 	}
 	
 	/**
@@ -1162,15 +1046,11 @@ public class HBaseSQLImport {
 		System.out.println("");
 	}
 
-	void test() {
+	void test() throws Exception {
 
-		// Test sqlKey token split
-		String sqlKey = "{CompanyId}_{NotificationRunId}_{NotificationId}";
-		System.out.println("Testing getRowKeyTokens " + sqlKey);
-		String[] tokens = getRowKeyTokens(sqlKey);
-		for (String token:tokens) {
-			System.out.println("token: " + token);
-		}
+		System.out.println("Testing HBaseHelper");
+		HBaseHelper.test();
 
+		System.out.println("Done.");
 	}
 }
