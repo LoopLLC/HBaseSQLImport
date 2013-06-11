@@ -1048,8 +1048,93 @@ public class HBaseSQLImport {
 	 * Get a single row from the HBase table and show the results, 
 	 * formatted according to the schema in the dictionary table.
 	 */
-	void get(String getRowKey, String tableName) {
+	void get(String getRowKey, String tableName) throws Exception {
+
+		// 4_901D4ECF-D879-41CE-B293-5EDFA9EA6BF2_9B1EF894-9807-4F1A-81D1-002F95212BEE
 		
+		// Put the table dictionary into a map keyed by f:q
+		ResultScanner ss = getDictionaryScanner(tableName);
+		List<HBaseDictionary> list = getDictionaryColumns(ss);
+		Collections.sort(list);
+		HashMap<String, HBaseDictionary> map = 
+			new HashMap<>();
+		for (HBaseDictionary d:list) {
+			map.put(d.getFamily() + ":" + d.getQualifier(), d);
+		}
+
+		// Get the row from HBase
+		Get get = new Get(Bytes.toBytes(getRowKey));
+		HTable htable = 
+			new HTable(this.config, tableName);
+		Result r = htable.get(get);
+
+		// Print a line for each row
+		for (HBaseDictionary d : list) {
+			
+			if (d.getNested()) {
+
+				System.out.print(String.format(
+					"%s (%s:%s): ", d.getName(), 
+					d.getFamily(), d.getQualifier()));
+
+				System.out.println(" (nested...TODO) ");
+
+			} else {
+
+				// This is a regular non-nested column
+				System.out.print(String.format(
+					"%s (%s:%s): ", d.getName(), 
+					d.getFamily(), d.getQualifier()));
+
+				byte[] value = r.getValue(
+					Bytes.toBytes(d.getFamily()), 
+					Bytes.toBytes(d.getQualifier()));
+				if (value == null) {
+					System.out.println("[NULL]");
+				} else {
+					String t = d.getType();
+					switch (t) {
+						
+						case "boolean":
+							System.out.println(Bytes.toBoolean(value));
+							break;
+						case "byte":
+							System.out.println(value[0]);
+							break;
+						case "short":
+							System.out.println(Bytes.toShort(value));
+							break; 
+						case "int":
+							System.out.println(Bytes.toInt(value));
+							break;
+						case "long":
+							System.out.println(Bytes.toLong(value));
+							break;
+						case "float":
+							System.out.println(Bytes.toFloat(value));
+							break;
+						case "decimal":
+							System.out.println(Bytes.toBigDecimal(value));
+							break;
+						case "double":
+							System.out.println(Bytes.toDouble(value));
+							break;
+						case "datetime":
+							System.out.println(
+								new java.util.Date(Bytes.toLong(value)));
+							break;
+						case "guid":
+						case "string":
+						case "nstring":
+							System.out.println(Bytes.toString(value));
+							break;
+						default: System.out.println(
+							"Unexpected type: " + t);
+					}
+				}
+
+			}
+		}
 	}
 	
 	/**
