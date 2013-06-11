@@ -157,6 +157,7 @@ public class HBaseHelper {
 			case "datetime": return java.sql.Types.TIMESTAMP; // Date (long)
 			case "guid": return java.sql.Types.CHAR; // String
 			case "short": return java.sql.Types.SMALLINT; // short
+			case "decimal": return java.sql.Types.DECIMAL; // Decimal
 			default: return 0;
 		}
 		// TODO - Convert this to a dictionary
@@ -319,19 +320,27 @@ public class HBaseHelper {
 
 		System.out.println("Padding tests passed");
 
-		// TODO - Test template tokens
+		System.out.println("Testing templates");
 
-		// static String[] getTokensFromTemplate(String template) {
+		testTemplate("cpn_{SlotNumber}_Name");
+		testTemplate("{CompanyId}_{NotificationRunId}_{NotificationId}");
+		testTemplate("{First_Name}_{Last_Name}");
+		testTemplate("CompanyId");
+		testTemplate("First_Name");
 
-		String template = "cpn_{SlotNumber}_Name";
+		System.out.println("Template tests done");
+	}
 
-		template = "{CompanyId}_{NotificationRunId}_{NotificationId}";
+	/**
+	 * Test breaking a template into tokens.
+	 */
+	static void testTemplate(String template) throws Exception {
 
-		template = "{First_Name}_{Last_Name}";
-
-		template = "CompanyId";
-
-		template = "First_Name";
+		System.out.println("Template: " + template);
+		String[] tokens = getTokensFromTemplate(template);
+		for (String token:tokens) {
+			System.out.println(token);
+		}
 
 	}
 
@@ -410,6 +419,12 @@ public class HBaseHelper {
 					return nullArray;
 				}
 				return Bytes.toBytes(date.getTime()); // long
+			case Types.DECIMAL:
+				java.math.BigDecimal bd = rs.getBigDecimal(columnName);
+				if (rs.wasNull()) {
+					return nullArray;
+				}
+				return Bytes.toBytes(bd);
 			default: throw new Exception(
 						"Unexpected SQL type: " + columnType);
 		}	
@@ -520,12 +535,52 @@ public class HBaseHelper {
 	 * 	[0] {First_Name}
 	 *	[1] {Last_Name}
 	 */
-	static String[] getTokensFromTemplate(String template) {
+	static String[] getTokensFromTemplate(String template) 
+		throws Exception {
+
 		String[] tokens = template.split("_");
 
 		List<String> retval = new ArrayList<>();
 
-		// TODO
+		boolean braces = false;
+		StringBuffer sb = new StringBuffer();
+
+		for (int i = 0; i < tokens.length; i++) {
+			
+			String token = tokens[i];
+			sb.append(token);
+
+			if (token.indexOf("{") > 0) 
+				throw new Exception("Invalid template: " + template);
+
+			if (token.indexOf("}") > -1 && 
+				token.indexOf("}") < (tokens.length - 1)) 
+				throw new Exception("Invalid template: " + template);
+			
+			if (token.startsWith("{")) {
+				braces = true;
+			}
+
+			if (braces == true && token.endsWith("}")) {
+				retval.add(sb.toString());
+				braces = false;
+				sb.setLength(0);
+				continue;
+			}
+
+			if (!braces && token.endsWith("}")) 
+				throw new Exception("Invalid template: " + template);
+
+			if (braces == false) {
+				retval.add(sb.toString());
+				sb.setLength(0);
+				continue;
+			}
+
+			// If we didn't finish a token, it means we're in the 
+			// middle of a variable in braces with an underscore
+			sb.append("_");
+		}
 
 		return retval.toArray(new String[retval.size()]);
 	}

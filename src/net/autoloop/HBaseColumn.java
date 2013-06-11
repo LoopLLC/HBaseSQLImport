@@ -47,6 +47,7 @@ public class HBaseColumn implements Comparable<HBaseColumn> {
 				validTypes.add("byte");
 				validTypes.add("guid");
 				validTypes.add("short");
+				validTypes.add("decimal");
 				if (!validTypes.contains(this.dataType)) {
 					throw new Exception("Invalid -t SQL Type");
 				}

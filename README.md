@@ -31,7 +31,7 @@ java HBaseSQLImport.jar
 
 *	-t	Column Data Type
 
-	int, string, nstring, boolean, byte, short, double, float, datetime, guid
+	int, string, nstring, boolean, byte, short, double, float, datetime, guid, decimal
 	
 	These type names are generic and not necessarily targeted to a single language.
 	

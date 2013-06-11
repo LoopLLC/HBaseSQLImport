@@ -75,6 +75,10 @@ public class HBaseSQLImport {
 		boolean isSchema = false;
 		boolean isTest = false;
 		boolean isShowDictionary = false;
+		boolean isScan = false;
+		boolean isGet = false;
+		String scanFilter = null;
+		String getRowKey = null;
 		String schemaPath = null;
 		String sqlTable = null;
 		String sqlSchema = null;
@@ -181,6 +185,14 @@ public class HBaseSQLImport {
 					isShowDictionary = true;
 					tableName = args[++i];
 					break;
+				case "-scan":
+					isScan = true;
+				 	scanFilter = args[++i];
+					break;
+				case "-get":
+					isGet = true;
+					getRowKey = args[++i];
+					break;	
 				default: break;
 			}
 		}
@@ -232,6 +244,20 @@ public class HBaseSQLImport {
 			test();
 		} else if (isShowDictionary) {
 			showDictionaryFormatted(tableName);
+		} else if (isScan) {
+			if (description.getTableName() == null) {
+				System.out.println("Missing -hbt Table Name");
+				usage();
+				return;
+			}
+			scan(scanFilter, description.getTableName());
+		} else if (isGet) {
+			if (description.getTableName() == null) {
+				System.out.println("Missing -hbt Table Name");
+				usage();
+				return;
+			}
+			get(getRowKey, description.getTableName());
 		} else {
 			usage();
 		}
@@ -1007,6 +1033,24 @@ public class HBaseSQLImport {
 		}
 
 	}
+
+	/**
+	 * Scan the HBase table, apply the filter, and show the results, 
+	 * formatted according to the schema in the dictionary table.
+	 */
+	void scan(String scanFilter, String tableName) {
+		
+		// TODO - Parse the scan filter.  
+
+	}
+
+	/**
+	 * Get a single row from the HBase table and show the results, 
+	 * formatted according to the schema in the dictionary table.
+	 */
+	void get(String getRowKey, String tableName) {
+		
+	}
 	
 	/**
 	 * Output usage to the console.
@@ -1019,7 +1063,7 @@ public class HBaseSQLImport {
 		System.out.println("\t-c\tSQL Column Name");
 		System.out.println("\t-t\tData Type");
 		System.out.println("\t\tstring, int, boolean, byte, long");
-		System.out.println("\t\tdouble, float, datetime");
+		System.out.println("\t\tdouble, float, datetime, decimal");
 		System.out.println("\t-k\tSQL Key");
 		System.out.println("\t-hbt\tHBase Table");
 
