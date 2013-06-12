@@ -329,6 +329,14 @@ public class HBaseHelper {
 		testTemplate("First_Name");
 
 		System.out.println("Template tests done");
+
+		System.out.println("getNestedKey cpn_001_n");
+		System.out.println(getNestedKey("cpn_001_n"));
+
+		System.out.println("getNestedSignature cpn_{SlotNumber}_n");
+		System.out.println(getNestedSignature("cpn_{SlotNumber}_n"));
+
+		System.out.println("HBaseHelper tests done.");
 	}
 
 	/**
@@ -688,5 +696,106 @@ public class HBaseHelper {
 
 	}
 
+	/**
+	 * Create a map of nested table columns based on a list
+	 * of all columns in the table.
+	 *
+	 * The table key is the first token, e.g. cpn
+	 *
+	 * The key for the column is the signature, e.g. cpn_n
+	 */
+	public static HashMap<String, HashMap<String, HBaseDictionary>> 
+		getNestedTables(List<HBaseDictionary> list) throws Exception {
+
+		HashMap<String, HashMap<String, HBaseDictionary>> nestedTables = 
+			new HashMap<> ();
+
+		for (HBaseDictionary d : list) {
+		
+			if (d.getNested()) {
+				String[] tokens = 
+					HBaseHelper.getTokensFromTemplate(
+							d.getQualifier());
+
+				String nestedTableName = tokens[0];
+
+				HashMap<String, HBaseDictionary> columns = null;
+				if (nestedTables.containsKey(nestedTableName)) {
+					columns = nestedTables.get(nestedTableName);
+				} else {
+					columns = new HashMap<>();
+					nestedTables.put(nestedTableName, columns);
+				}			
+
+				columns.put(getNestedSignature(d.getQualifier()), d);
+						
+			}
+		}
+
+		return nestedTables;
+	}
+
+	/**
+	 * For nested columns, get the name of the "table" that 
+	 * groups nested columns.
+	 *
+	 * e.g. cpn_{SlotNumber}_x has a table name of "cpn", 
+	 * so that all columns starting with cpn_ can be grouped.
+	 */
+	public static String getNestedTableName(HBaseDictionary d) 
+		throws Exception {
+
+		if (d.getNested() == false) return null;
+
+		String[] tokens = HBaseHelper
+			.getTokensFromTemplate(d.getQualifier());
+
+		return tokens[0];
+
+	}
+
+	/**
+	 * Get the column name minus the variables.
+	 *
+	 * This will be compared to actual column names to figure
+	 * out which column matches the signature.
+	 *
+	 * e.g. cpn_{SlotNumber}_n == cpn_001_n (Signature cpn_n)
+	 *
+	 * The signature is by nature the first and last token 
+	 * concatenated, since the variables need to be in the middle.
+	 * The first token is the nested table name, and the last 
+	 * token is the nested column name.
+	 */
+	public static String getNestedSignature(String qualifier) 
+		throws Exception {
+		
+		String[] tokens = qualifier.split("_");
+
+		return tokens[0] + "_" + tokens[tokens.length - 1]; 
+	}
+
+	/**
+	 * Get the "row key" for a nested qualifier.
+	 *
+	 * This is not a regular row key, it's the virtual key for 
+	 * this nested row.
+	 *
+	 * e.g. cpn_{SlotNumber}_n has a real qualifier of cpn_001_n, 
+	 * the unique key for that virtual row is cpn_001.  This can be 
+	 * used to group the KeyValues in that row so they correspond
+	 * to the actual row in SQL.
+	 */
+	public static String getNestedKey(String qualifier) 
+		throws Exception {
+		
+		int idx = qualifier.lastIndexOf("_");
+
+		if (idx < 0) {
+			throw new Exception("Unexpected qualifier: " + qualifier);
+		}
+
+		return qualifier.substring(0, idx);
+	}
 }
 

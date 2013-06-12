@@ -262,6 +262,7 @@ public class HBaseSQLImport {
 			usage();
 		}
 		
+		// TODO - Cleanup?  Close HBase resources?
 	}
 
 	/**
@@ -1045,21 +1046,87 @@ public class HBaseSQLImport {
 	}
 
 	/**
+	 * Print out the value, formatting according to the type.
+	 */
+	void printValue(HBaseDictionary d, byte[] value, String prefix, 
+			String actualQualifier) {
+
+		System.out.print(String.format(
+			"%s%s (%s:%s): ", 
+			prefix,
+			d.getName(), 
+			d.getFamily(), 
+			actualQualifier));
+
+		if (value == null) {
+			System.out.println("[NULL]");
+		} else {
+			String t = d.getType();
+			switch (t) {
+				
+				case "boolean":
+					System.out.println(Bytes.toBoolean(value));
+					break;
+				case "byte":
+					System.out.println(value[0]);
+					break;
+				case "short":
+					System.out.println(Bytes.toShort(value));
+					break; 
+				case "int":
+					System.out.println(Bytes.toInt(value));
+					break;
+				case "long":
+					System.out.println(Bytes.toLong(value));
+					break;
+				case "float":
+					System.out.println(Bytes.toFloat(value));
+					break;
+				case "decimal":
+					System.out.println(Bytes.toBigDecimal(value));
+					break;
+				case "double":
+					System.out.println(Bytes.toDouble(value));
+					break;
+				case "datetime":
+					System.out.println(
+						new java.util.Date(Bytes.toLong(value)));
+					break;
+				case "guid":
+				case "string":
+				case "nstring":
+					String str = Bytes.toString(value);
+					str = str.replace("\r", "\\r");
+					str = str.replace("\n", "\\n");
+					System.out.println(str);
+					break;
+				default: System.out.println(
+					"Unexpected type: " + t);
+			}
+		}
+	}
+
+	/**
 	 * Get a single row from the HBase table and show the results, 
 	 * formatted according to the schema in the dictionary table.
 	 */
 	void get(String getRowKey, String tableName) throws Exception {
 
-		// 4_901D4ECF-D879-41CE-B293-5EDFA9EA6BF2_9B1EF894-9807-4F1A-81D1-002F95212BEE
+		// 0000000004_901D4ECF-D879-41CE-B293-5EDFA9EA6BF2_9B1EF894-9807-4F1A-81D1-002F95212BEE
 		
-		// Put the table dictionary into a map keyed by f:q
+		// 0000000004_E4C1D7BA-9F61-42DF-A489-7630A68E8F2D_9C7B8599-144F-4E16-B9B2-BFB3BC7F4485
+
+		// Put the table dictionary into a map keyed by
+		// nested column signature (cpn_n)
 		ResultScanner ss = getDictionaryScanner(tableName);
 		List<HBaseDictionary> list = getDictionaryColumns(ss);
 		Collections.sort(list);
-		HashMap<String, HBaseDictionary> map = 
-			new HashMap<>();
+
+		// Map of all columns
+		HashMap<String, HBaseDictionary> map = new HashMap<>();
+
 		for (HBaseDictionary d:list) {
-			map.put(d.getFamily() + ":" + d.getQualifier(), d);
+			map.put(HBaseHelper.getNestedSignature(d.getQualifier()), d);
 		}
 
 		// Get the row from HBase
@@ -1073,68 +1140,126 @@ public class HBaseSQLImport {
 			
 			if (d.getNested()) {
 
-				System.out.print(String.format(
-					"%s (%s:%s): ", d.getName(), 
-					d.getFamily(), d.getQualifier()));
-
-				System.out.println(" (nested...TODO) ");
+				// Nested columns are printed out later
+				continue;
 
 			} else {
 
 				// This is a regular non-nested column
-				System.out.print(String.format(
-					"%s (%s:%s): ", d.getName(), 
-					d.getFamily(), d.getQualifier()));
-
 				byte[] value = r.getValue(
 					Bytes.toBytes(d.getFamily()), 
 					Bytes.toBytes(d.getQualifier()));
-				if (value == null) {
-					System.out.println("[NULL]");
-				} else {
-					String t = d.getType();
-					switch (t) {
-						
-						case "boolean":
-							System.out.println(Bytes.toBoolean(value));
-							break;
-						case "byte":
-							System.out.println(value[0]);
-							break;
-						case "short":
-							System.out.println(Bytes.toShort(value));
-							break; 
-						case "int":
-							System.out.println(Bytes.toInt(value));
-							break;
-						case "long":
-							System.out.println(Bytes.toLong(value));
-							break;
-						case "float":
-							System.out.println(Bytes.toFloat(value));
-							break;
-						case "decimal":
-							System.out.println(Bytes.toBigDecimal(value));
-							break;
-						case "double":
-							System.out.println(Bytes.toDouble(value));
-							break;
-						case "datetime":
-							System.out.println(
-								new java.util.Date(Bytes.toLong(value)));
-							break;
-						case "guid":
-						case "string":
-						case "nstring":
-							System.out.println(Bytes.toString(value));
-							break;
-						default: System.out.println(
-							"Unexpected type: " + t);
-					}
-				}
-
+				
+				printValue(d, value, "", d.getQualifier());
 			}
 		}
+
+		// Now print nested columns
+
+		boolean hasNested = false;
+		for (HBaseDictionary d : list) {
+			
+			//System.out.println(String.format(
+			//	"%s: %b", d.getQualifier(), d.getNested()));
+
+			if (d.getNested()) {
+				hasNested = true;
+				break;
+			}
+		}
+
+		// No need to continue if there are no nested columns
+		if (!hasNested) {
+			System.out.println("(No Nested Columns)");
+			return;
+		}
+
+		System.out.println();
+		System.out.println("--- Nested Columns --- ");
+		System.out.println();
+
+		// Create a collection for nested groups, which are keyed
+		// by the first token in the qualifier.
+
+		// (This seems like it would have been a great use for 
+		// column families, but apparently HBase performs poorly
+		// if you use them in the way that makes sense)
+
+		// Map of nested column token[0] to list of matching columns
+		// e.g. "cpn" = map(cpn_n -> cpn_{SlotNumber}_n, etc)
+		HashMap<String, HashMap<String, HBaseDictionary>> nestedTables = 
+			HBaseHelper.getNestedTables(list);
+
+		KeyValue[] keyValues = r.raw();
+
+		// Map of tableName_Value -> list of KeyValue
+		// e.g. all KeyValues for cpn_001
+		HashMap<String, List<KeyValue>> rows = new HashMap<>();
+
+		List<String> nestedKeys = new ArrayList<>();
+
+		// Iterate through all KeyValues, and add the nested ones
+		// to the row that matches the nested row key.
+		for (int i = 0; i < keyValues.length; i++) {
+
+			KeyValue kv = keyValues[i];
+
+			String family = Bytes.toString(kv.getFamily());
+			String qualifier = Bytes.toString(kv.getQualifier());
+
+			String signature = HBaseHelper.getNestedSignature(qualifier);
+			HBaseDictionary d = map.get(signature);
+
+			if (d == null) {
+				throw new Exception("map missing " + signature);
+			}
+
+			if (!d.getNested()) continue;
+
+			String nestedKey = HBaseHelper.getNestedKey(qualifier);
+
+			List<KeyValue> row = null;
+			if (rows.containsKey(nestedKey)) {
+				row = rows.get(nestedKey);
+			} else {
+				row = new ArrayList<>();
+				rows.put(nestedKey, row);
+				nestedKeys.add(nestedKey);
+			}
+			row.add(kv);
+		}
+
+		Collections.sort(nestedKeys);
+
+		for (String nestedKey : nestedKeys) {
+
+			List<KeyValue> row = rows.get(nestedKey);
+
+			// Get the dictionary descriptions for the columns
+			HashMap<String, HBaseDictionary> nestedTable = 
+				nestedTables.get(nestedKey.split("_")[0]);
+
+			boolean first = true;
+			for (KeyValue kv : row) {
+
+				if (first) {
+
+					System.out.println("Nested Row: " + nestedKey);
+
+					first = false;
+				}
+
+				String family = Bytes.toString(kv.getFamily());
+				String qualifier = Bytes.toString(kv.getQualifier());
+
+				HBaseDictionary d = nestedTable.get(
+						HBaseHelper.getNestedSignature(qualifier));
+
+				printValue(d, kv.getValue(), "\t", qualifier);
+								
+			}
+		}
+
 	}
 	
 	/**

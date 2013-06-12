@@ -68,4 +68,5 @@ public class HBaseDictionary implements Comparable<HBaseDictionary> {
 		else if (s.equals("false")) this.nested = false;
 		else throw new Exception("Invalid String: " + s);
 	}	
+
 }
