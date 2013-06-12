@@ -1433,17 +1433,34 @@ public class HBaseSQLImport {
 	}
 
 	void examples() {
-		System.out.println("java -jar dist/HBaseSQLImport.jar -scan \"d:asn=Scheduled Maintenance\" -hbt notification -columns \"d:cid,d:nid\"");
+		System.out.println(
+			"java -jar dist/HBaseSQLImport.jar" + 
+		   	" -scan \"d:asn=Scheduled Maintenance\" " + 
+			" -hbt notification -columns \"d:cid,d:nid\"");
 		
-		System.out.println("java -jar dist/HBaseSQLImport.jar -get 0000000004_E4C1D7BA-9F61-42DF-A489-7630A68E8F2D_9C7B8599-144F-4E16-B9B2-BFB3BC7F4485 -hbt notification");
+		System.out.println(
+			"java -jar dist/HBaseSQLImport.jar" + 
+		   	" -get 0000000004_E4C1D7BA-9F61-42DF-A489" + 
+			"-7630A68E8F2D_9C7B8599-144F-4E16-B9B2-BFB3BC7F4485" + 
+		   	" -hbt notification");
 		
-		System.out.println("java -jar dist/HBaseSQLImport.jar -import -qn Lookups -sqlh engineering19b -sqlu hadoop -sqldb LoopEzb_A_01");
+		System.out.println(
+			"java -jar dist/HBaseSQLImport.jar" + 
+		   	" -import -qn Lookups -sqlh engineering19b" + 
+			" -sqlu hadoop -sqldb LoopEzb_A_01");
 		
-		System.out.println("java -jar dist/HBaseSQLImport.jar -schema ~/Hadoop/LoopHadoop/hbsqli/lookup.json");
+		System.out.println(
+			"java -jar dist/HBaseSQLImport.jar" + 
+		   	" -schema ~/Hadoop/LoopHadoop/hbsqli/lookup.json");
 		
-		System.out.println("java -jar dist/HBaseSQLImport.jar -qn Companies -ty Table -hbt company -k CompanyId -save -q sql/companies.sql ");
+		System.out.println(
+			"java -jar dist/HBaseSQLImport.jar" + 
+		   	" -qn Companies -ty Table -hbt company " + 
+			" -k CompanyId -save -q sql/companies.sql ");
 		
-		System.out.println("java -jar dist/HBaseSQLImport.jar -qn Companies -show -format");
+		System.out.println(
+			"java -jar dist/HBaseSQLImport.jar" + 
+		   	" -qn Companies -show -format");
 	}
 
 	void test() throws Exception {

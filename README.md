@@ -1,10 +1,26 @@
 ##HBaseSQLImport
 
+**Eric Z. Beard**
+
+<eric@loopfx.com>
+
 Imports data from SQL Server into HBase.
 
-Mappings are defined between the columns in custom queries and columns in HBase.
+Mappings are defined between the columns in custom queries and columns in HBase.  
 
-This is a command line application written in Java that is similar to Sqoop. 
+This is a command line application written in Java that is similar to Sqoop.
+
+It also offers some convenient functions for getting and scanning rows in HBase, displaying the values according to the schema established when importing data. 
+
+*DISCLAIMER*
+
+*This code is very early in its life cycle and has not undergone any serious testing!  I don't recommend using it for any mission critical applications yet.  The design is still evolving, and it may undergo serious changes before it's ready for production.  It's been years since I've done any serious Java programming.  In other words, use at your own risk!*
+
+Build:
+
+Just type "ant".
+
+The build system probably needs a ton of work.  I created it with NetBeans, and I also created an IntelliJ IDEA project.  Seems like all the cool kids are using Maven these days, so I should get that figured out at some point.
 
 Usage:
 
@@ -33,7 +49,7 @@ java HBaseSQLImport.jar
 
 	int, string, nstring, boolean, byte, short, double, float, datetime, guid, decimal
 	
-	These type names are generic and not necessarily targeted to a single language.
+	These type names represent a relationship between a Java SQL Type and a regular Java type.  For example, "guid" represents a SQL Server UNIQEUIDENTIFIER, which is a java.sql.CHAR, which gets converted to a Java String.
 	
 *	-k	SQL Key
 
@@ -77,7 +93,7 @@ java HBaseSQLImport.jar
 	
 *	-schema FileName.json
 
-	Define the schema using a JSON file instead of typing each one out manually.
+	Define the schema using a JSON file instead of typing each one out manually as a separate command.  This is how you will define schemas most of the time.  There should be a one to one relationship between JSON schema files and SQL import files.  If the same column is defined in multiple schema files, the most recent version wins.  The schema and dictionary entries will be overwritten each time the schema is saved.
 	
     [
     { 
@@ -99,12 +115,25 @@ java HBaseSQLImport.jar
     }
     ]
 
+*	-get RowKey -hbt TableName
+		
+	Get a single row
+
+*	-scan "d:x=y" -hbt TableName
+		
+	Scan all rows that match the filter
+
+*	-columns "d:x,d:y"
+	
+	Column filter for -get or -scan
+
+*	-examples Output some example commands
 
 Tables and Columns are linked by the Query Name.
 
 The idea is that you write import queries and name them so that as the application is processing rows, it knows where to put the data.
 
-The import query can be any valid SQL Server TSQL query, it just needs to produce a single result set.
+The import query can be any valid SQL Server TSQL query, it just needs to produce a single result set with values that match the expected data types.
 
 Examples:
 
@@ -117,6 +146,14 @@ java -jar dist/HBaseSQLImport.jar -qn Companies -show
 java -jar dist/HBaseSQLImport.jar -qn Companies -show -format
 
 java -jar dist/HBaseSQLImport.jar -qn Companies -delete -ty Table
+
+java -jar dist/HBaseSQLImport.jar -scan "d:asn=Scheduled Maintenance" -hbt notification -columns "d:cid,d:nid"
+
+java -jar dist/HBaseSQLImport.jar -get 123 -hbt company
+
+java -jar dist/HBaseSQLImport.jar -import -qn Companies -sqlh mymachine -sqlu hadoop -sqldb dbname
+
+java -jar dist/HBaseSQLImport.jar -schema ~/company.json
 
 
 
