@@ -77,7 +77,9 @@ public class HBaseSQLImport {
 		boolean isShowDictionary = false;
 		boolean isScan = false;
 		boolean isGet = false;
+		boolean isExamples = false;
 		String scanFilter = null;
+		String columnFilter = "*";
 		String getRowKey = null;
 		String schemaPath = null;
 		String sqlTable = null;
@@ -189,10 +191,16 @@ public class HBaseSQLImport {
 					isScan = true;
 				 	scanFilter = args[++i];
 					break;
+				case "-columns":
+					columnFilter = args[++i];
+					break;
 				case "-get":
 					isGet = true;
 					getRowKey = args[++i];
 					break;	
+				case "-examples":
+					examples();
+					return;
 				default: break;
 			}
 		}
@@ -250,14 +258,14 @@ public class HBaseSQLImport {
 				usage();
 				return;
 			}
-			scan(scanFilter, description.getTableName());
+			scan(scanFilter, description.getTableName(), columnFilter);
 		} else if (isGet) {
 			if (description.getTableName() == null) {
 				System.out.println("Missing -hbt Table Name");
 				usage();
 				return;
 			}
-			get(getRowKey, description.getTableName());
+			get(getRowKey, description.getTableName(), columnFilter);
 		} else {
 			usage();
 		}
@@ -1039,17 +1047,115 @@ public class HBaseSQLImport {
 	 * Scan the HBase table, apply the filter, and show the results, 
 	 * formatted according to the schema in the dictionary table.
 	 */
-	void scan(String scanFilter, String tableName) {
-		
-		// TODO - Parse the scan filter.  
+	void scan(String scanFilter, String tableName, 
+			String columnFilter) throws Exception {
 
+		// For now we'll just do simple comparisons.
+		// "d:cid = 4"
+		String[] filterTokens = scanFilter.split("=");
+		String[] fqTokens = filterTokens[0].split(":");
+		String family = fqTokens[0].trim();
+		String qualifier = fqTokens[1].trim();
+		String columnValue = filterTokens[1].trim();
+
+		System.out.println(String.format(
+			"Scanning %s for family %s, qualifier %s, value %s", 
+			tableName, family, qualifier, columnValue));
+		
+		HTable htable = 
+			new HTable(this.config, tableName);
+
+		// Put the table dictionary into a map keyed by
+		// nested column signature (cpn_n)
+		ResultScanner dictionaryScanner = getDictionaryScanner(tableName);
+		List<HBaseDictionary> list = 
+			getDictionaryColumns(dictionaryScanner);
+		Collections.sort(list);
+
+		Scan s = new Scan();
+		byte[] f = Bytes.toBytes(family);
+		byte[] q = Bytes.toBytes(qualifier);
+		
+		FilterList filterList = 
+			new FilterList(FilterList.Operator.MUST_PASS_ONE);
+		
+		SingleColumnValueFilter tableFilter = new SingleColumnValueFilter(
+			f,
+			q,
+			CompareFilter.CompareOp.EQUAL, 
+			Bytes.toBytes(columnValue)
+		);
+		filterList.addFilter(tableFilter);
+		
+		/*
+		RegexStringComparator comp = 
+			new RegexStringComparator("^" + 
+					description.getQueryName() + "_*");   
+		SingleColumnValueFilter columnFilter = 
+			new SingleColumnValueFilter(
+				cf,
+				q,
+				CompareFilter.CompareOp.EQUAL,
+				comp
+				);
+		list.addFilter(columnFilter);
+		*/
+
+		s.setFilter(filterList);
+		
+		ResultScanner ss = htable.getScanner(s);
+
+		for (Result r : ss) {
+
+			printResult(r, list, columnFilter);
+			System.out.println("-------------------");
+			// TODO - Confirm after each row?
+		}
+	}
+
+	/**
+	 * Compares the column filter list to the column to see 
+	 * if we should include the column in output.
+	 */
+	boolean includeColumn(String columnFilter, HBaseDictionary d) {
+		
+		if (columnFilter == null || columnFilter.equals("*")) {
+			return true;
+		}
+
+		String[] tokens = columnFilter.split(",");
+		for (String token : tokens) {
+			token = token.trim();
+
+			String[] fq = token.split(":");
+			String family = "d";
+			String qualifier = null;
+			if (fq.length == 1) {
+				qualifier = fq[0];
+			} else {
+				family = fq[0];
+				qualifier = fq[1];
+			}
+			if (d.getFamily().equals(family) && 
+				d.getQualifier().equals(qualifier)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
 	 * Print out the value, formatting according to the type.
 	 */
 	void printValue(HBaseDictionary d, byte[] value, String prefix, 
-			String actualQualifier) {
+			String actualQualifier, String columnFilter) {
+
+		// First make sure we actually want to see this column.
+		// TODO - Better to filter pre-scan??
+		if (!includeColumn(columnFilter, d)) {
+			return;
+		}
 
 		System.out.print(String.format(
 			"%s%s (%s:%s): ", 
@@ -1110,7 +1216,8 @@ public class HBaseSQLImport {
 	 * Get a single row from the HBase table and show the results, 
 	 * formatted according to the schema in the dictionary table.
 	 */
-	void get(String getRowKey, String tableName) throws Exception {
+	void get(String getRowKey, String tableName, String columnFilter) 
+		throws Exception {
 
 		// 0000000004_901D4ECF-D879-41CE-B293-5EDFA9EA6BF2_9B1EF894-9807-4F1A-81D1-002F95212BEE
 		
@@ -1122,21 +1229,31 @@ public class HBaseSQLImport {
 		List<HBaseDictionary> list = getDictionaryColumns(ss);
 		Collections.sort(list);
 
-		// Map of all columns
-		HashMap<String, HBaseDictionary> map = new HashMap<>();
-
-		for (HBaseDictionary d:list) {
-			map.put(HBaseHelper.getNestedSignature(d.getQualifier()), d);
-		}
-
 		// Get the row from HBase
 		Get get = new Get(Bytes.toBytes(getRowKey));
 		HTable htable = 
 			new HTable(this.config, tableName);
+
 		Result r = htable.get(get);
 
-		// Print a line for each row
-		for (HBaseDictionary d : list) {
+		printResult(r, list, columnFilter);
+	}
+
+	/**
+	 * Print out the contents of a row in Hbase.
+	 */
+	void printResult(Result r, List<HBaseDictionary> columnList, 
+			String columnFilter) 
+		throws Exception {
+
+		// Map of all columns
+		HashMap<String, HBaseDictionary> map = new HashMap<>();
+
+		for (HBaseDictionary d:columnList) {
+			map.put(HBaseHelper.getNestedSignature(d.getQualifier()), d);
+		}
+
+		for (HBaseDictionary d : columnList) {
 			
 			if (d.getNested()) {
 
@@ -1150,14 +1267,15 @@ public class HBaseSQLImport {
 					Bytes.toBytes(d.getFamily()), 
 					Bytes.toBytes(d.getQualifier()));
 				
-				printValue(d, value, "", d.getQualifier());
+				printValue(d, value, "", d.getQualifier(), columnFilter);
 			}
 		}
 
 		// Now print nested columns
 
+
 		boolean hasNested = false;
-		for (HBaseDictionary d : list) {
+		for (HBaseDictionary d : columnList) {
 			
 			//System.out.println(String.format(
 			//	"%s: %b", d.getQualifier(), d.getNested()));
@@ -1170,12 +1288,10 @@ public class HBaseSQLImport {
 
 		// No need to continue if there are no nested columns
 		if (!hasNested) {
-			System.out.println("(No Nested Columns)");
+			//System.out.println("(No Nested Columns)");
 			return;
 		}
 
-		System.out.println();
-		System.out.println("--- Nested Columns --- ");
 		System.out.println();
 
 		// Create a collection for nested groups, which are keyed
@@ -1188,7 +1304,7 @@ public class HBaseSQLImport {
 		// Map of nested column token[0] to list of matching columns
 		// e.g. "cpn" = map(cpn_n -> cpn_{SlotNumber}_n, etc)
 		HashMap<String, HashMap<String, HBaseDictionary>> nestedTables = 
-			HBaseHelper.getNestedTables(list);
+			HBaseHelper.getNestedTables(columnList);
 
 		KeyValue[] keyValues = r.raw();
 
@@ -1244,7 +1360,14 @@ public class HBaseSQLImport {
 
 				if (first) {
 
-					System.out.println("Nested Row: " + nestedKey);
+					// Don't print the nested row header if we're 
+					// using a column filter.
+					if (columnFilter == null || 
+						columnFilter.equals("*")) {
+						
+						System.out.println("Nested Row: " + nestedKey);
+					
+					}
 
 					first = false;
 				}
@@ -1255,7 +1378,8 @@ public class HBaseSQLImport {
 				HBaseDictionary d = nestedTable.get(
 						HBaseHelper.getNestedSignature(qualifier));
 
-				printValue(d, kv.getValue(), "\t", qualifier);
+				printValue(d, kv.getValue(), "\t", qualifier, 
+						columnFilter);
 								
 			}
 		}
@@ -1266,7 +1390,7 @@ public class HBaseSQLImport {
 	 * Output usage to the console.
 	 */
 	private void usage() {
-		System.out.println("java -jar dist/HBaseSQLImport.jar");
+		System.out.println("HBaseSQLImport v0.1");
 		System.out.println("\t-qn\tQueryName");
 		System.out.println("\t-q\tQueryFile");
 		System.out.println("\t-ty\tType (Table or Column)");
@@ -1298,6 +1422,28 @@ public class HBaseSQLImport {
 				"-sqlh Host -sqlu User -sqldb Database");
 		System.out.println("\t-schema SchemaFile.json");
 		System.out.println("");
+		System.out.println("\t-get RowKey -hbt TableName");
+		System.out.println("\t\tGet a single row");
+		System.out.println("\t-scan \"d:x=y\" -hbt TableName");
+		System.out.println("\t\tScan all rows that match the filter");
+		System.out.println("\t-columns \"d:x,d:y\"");
+		System.out.println("\t\tColumn filter for -get or -scan");
+		System.out.println("");
+		System.out.println("\t-examples Output some example commands");
+	}
+
+	void examples() {
+		System.out.println("java -jar dist/HBaseSQLImport.jar -scan \"d:asn=Scheduled Maintenance\" -hbt notification -columns \"d:cid,d:nid\"");
+		
+		System.out.println("java -jar dist/HBaseSQLImport.jar -get 0000000004_E4C1D7BA-9F61-42DF-A489-7630A68E8F2D_9C7B8599-144F-4E16-B9B2-BFB3BC7F4485 -hbt notification");
+		
+		System.out.println("java -jar dist/HBaseSQLImport.jar -import -qn Lookups -sqlh engineering19b -sqlu hadoop -sqldb LoopEzb_A_01");
+		
+		System.out.println("java -jar dist/HBaseSQLImport.jar -schema ~/Hadoop/LoopHadoop/hbsqli/lookup.json");
+		
+		System.out.println("java -jar dist/HBaseSQLImport.jar -qn Companies -ty Table -hbt company -k CompanyId -save -q sql/companies.sql ");
+		
+		System.out.println("java -jar dist/HBaseSQLImport.jar -qn Companies -show -format");
 	}
 
 	void test() throws Exception {
