@@ -892,6 +892,8 @@ public class HBaseSQLImport {
 		HTable htable = 
 			new HTable(this.config, tableDescription.getTableName());
 
+		htable.setAutoFlush(false);
+
 		Connection con = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -1014,9 +1016,6 @@ public class HBaseSQLImport {
 				htable.put(p);
 				totalRowsSaved++;
 
-				// TODO - htable.setAutoFlush(false), 
-				// flush/commit later to speed things up
-
 				if (totalRowsSaved % 1000 == 0) {
 					System.out.println(
 							"Saved " + totalRowsSaved + " rows so far...");
@@ -1030,15 +1029,23 @@ public class HBaseSQLImport {
 		catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-			if (rs != null) {
-				try { rs.close(); } catch (Exception e) { }
+
+			// Flush HTable writes
+			try {
+				htable.flushCommits();
+			} catch (Exception hfex) {
+				hfex.printStackTrace();
 			}
-			if (stmt != null) {
-				try { stmt.close(); } catch (Exception e) { }
-			}
-			if (con != null) {
-				try { con.close(); } catch (Exception e) { }
-			}
+
+			// Close HTable
+			try {
+				htable.close();
+			} catch(Exception e) {}
+
+			// Close SQL resources
+			try { rs.close(); } catch (Exception e) { }
+			try { stmt.close(); } catch (Exception e) { }
+			try { con.close(); } catch (Exception e) { }
 		}
 
 	}
@@ -1137,7 +1144,8 @@ public class HBaseSQLImport {
 				qualifier = fq[1];
 			}
 			if (d.getFamily().equals(family) && 
-				d.getQualifier().equals(qualifier)) {
+				(d.getQualifier().equals(qualifier) || 
+				 qualifier.equals("*"))) {
 				return true;
 			}
 		}
@@ -1219,9 +1227,14 @@ public class HBaseSQLImport {
 	void get(String getRowKey, String tableName, String columnFilter) 
 		throws Exception {
 
+		// Trigger
 		// 0000000004_901D4ECF-D879-41CE-B293-5EDFA9EA6BF2_9B1EF894-9807-4F1A-81D1-002F95212BEE
 		
+		// Trigger with coupon
 		// 0000000004_E4C1D7BA-9F61-42DF-A489-7630A68E8F2D_9C7B8599-144F-4E16-B9B2-BFB3BC7F4485
+
+		// Campaign
+		// 0000000004_00064BCD-C059-4A1A-996A-0AAA8E3A8554_54C9F106-1FA3-4FED-96EC-615BFF36D219  
 
 		// Put the table dictionary into a map keyed by
 		// nested column signature (cpn_n)
@@ -1272,7 +1285,6 @@ public class HBaseSQLImport {
 		}
 
 		// Now print nested columns
-
 
 		boolean hasNested = false;
 		for (HBaseDictionary d : columnList) {
@@ -1380,10 +1392,8 @@ public class HBaseSQLImport {
 
 				printValue(d, kv.getValue(), "\t", qualifier, 
 						columnFilter);
-								
 			}
 		}
-
 	}
 	
 	/**
@@ -1411,6 +1421,7 @@ public class HBaseSQLImport {
 
 		System.out.println("\t-show\tShow a mapping description");
 		System.out.println("\t-format\tFormat the output from -show");
+		System.out.println("\t-dictionary Describe columns for a table");
 		System.out.println();
 
 		System.out.println("\t-sqld\tDescribe a table in SQL Server");

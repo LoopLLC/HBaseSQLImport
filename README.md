@@ -16,11 +16,13 @@ It also offers some convenient functions for getting and scanning rows in HBase,
 
 *This code is very early in its life cycle and has not undergone any serious testing!  I don't recommend using it for any mission critical applications yet.  The design is still evolving, and it may undergo serious changes before it's ready for production.  It's been years since I've done any serious Java programming.  In other words, use at your own risk!*
 
+Development Configuration: Mac OS X, Java 1.7, Hadoop 1.1.2, HBase 0.94.7 in pseudo-distributed mode, SQL Server 2008/12, and Vim of course.  :w!
+
 Build:
 
 Just type "ant".
 
-The build system probably needs a ton of work.  I created it with NetBeans, and I also created an IntelliJ IDEA project.  Seems like all the cool kids are using Maven these days, so I should get that figured out at some point.
+The build system probably needs some work.  I created it with NetBeans, and I also created an IntelliJ IDEA project.  Seems like all the cool kids are using Maven these days, so I should get that figured out at some point.
 
 Usage:
 
@@ -82,6 +84,10 @@ java HBaseSQLImport.jar
 *	-show [-format]
 
 	Show the schema mapping information for -qn QueryName
+	
+*	-dictionary
+
+	Describe the columns in an HBase table, based on the schema mapping descriptions.  These descriptions are independent of a any single import, so if two imports describe the same column, the last description processed wins (ideally they would have the same description).
 	
 *	-delete
 
