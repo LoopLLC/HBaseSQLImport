@@ -1059,11 +1059,19 @@ public class HBaseSQLImport {
 
 		// For now we'll just do simple comparisons.
 		// "d:cid = 4"
-		String[] filterTokens = scanFilter.split("=");
-		String[] fqTokens = filterTokens[0].split(":");
-		String family = fqTokens[0].trim();
-		String qualifier = fqTokens[1].trim();
-		String columnValue = filterTokens[1].trim();
+
+		System.out.println("Scan Filter: " + scanFilter);
+
+		String family = "*";
+		String qualifier = "*";
+		String columnValue = "*";
+		if (!scanFilter.equals("*")) {
+			String[] filterTokens = scanFilter.split("=");
+			String[] fqTokens = filterTokens[0].split(":");
+			family = fqTokens[0].trim();
+			qualifier = fqTokens[1].trim();
+			columnValue = filterTokens[1].trim();
+		}
 
 		System.out.println(String.format(
 			"Scanning %s for family %s, qualifier %s, value %s", 
@@ -1083,32 +1091,41 @@ public class HBaseSQLImport {
 		byte[] f = Bytes.toBytes(family);
 		byte[] q = Bytes.toBytes(qualifier);
 		
-		FilterList filterList = 
-			new FilterList(FilterList.Operator.MUST_PASS_ONE);
-		
-		SingleColumnValueFilter tableFilter = new SingleColumnValueFilter(
-			f,
-			q,
-			CompareFilter.CompareOp.EQUAL, 
-			Bytes.toBytes(columnValue)
-		);
-		filterList.addFilter(tableFilter);
-		
-		/*
-		RegexStringComparator comp = 
-			new RegexStringComparator("^" + 
-					description.getQueryName() + "_*");   
-		SingleColumnValueFilter columnFilter = 
-			new SingleColumnValueFilter(
-				cf,
+		if (!scanFilter.equals("*")) {
+			FilterList filterList = 
+				new FilterList(FilterList.Operator.MUST_PASS_ONE);
+			
+			SingleColumnValueFilter tableFilter = new SingleColumnValueFilter(
+				f,
 				q,
-				CompareFilter.CompareOp.EQUAL,
-				comp
-				);
-		list.addFilter(columnFilter);
-		*/
+				CompareFilter.CompareOp.EQUAL, 
+				Bytes.toBytes(columnValue)
+			);
+			tableFilter.setFilterIfMissing(true);
+			filterList.addFilter(tableFilter);
 
-		s.setFilter(filterList);
+			// TODO - This only works for Strings.  Need to look up the dictionary
+			// type and convert to int, etc.
+			
+			/*
+			RegexStringComparator comp = 
+				new RegexStringComparator("^" + 
+						description.getQueryName() + "_*");   
+			SingleColumnValueFilter columnFilter = 
+				new SingleColumnValueFilter(
+					cf,
+					q,
+					CompareFilter.CompareOp.EQUAL,
+					comp
+					);
+			list.addFilter(columnFilter);
+			*/
+
+			System.out.println("Adding filter");
+			s.setFilter(filterList);
+		} else {
+			System.out.println("No filter");
+		}
 		
 		ResultScanner ss = htable.getScanner(s);
 
@@ -1235,6 +1252,9 @@ public class HBaseSQLImport {
 
 		// Campaign
 		// 0000000004_00064BCD-C059-4A1A-996A-0AAA8E3A8554_54C9F106-1FA3-4FED-96EC-615BFF36D219  
+
+		// Click
+		// 0000000004_6D89B3CE-E4AC-460E-94D8-60D5533A86F2_9CC982A6-D010-4ED2-B840-0F9C54E1A6A1  
 
 		// Put the table dictionary into a map keyed by
 		// nested column signature (cpn_n)
