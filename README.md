@@ -161,7 +161,7 @@ java -jar dist/HBaseSQLImport.jar -import -qn Companies -sqlh mymachine -sqlu ha
 
 java -jar dist/HBaseSQLImport.jar -schema ~/company.json
 
-java -jar dist/HBaseSQLImport.jar -scan \* -hbt lookup
+java -jar dist/HBaseSQLImport.jar -scan \\* -hbt lookup
 
 
 
