@@ -270,7 +270,9 @@ public class HBaseSQLImport {
 			usage();
 		}
 		
-		// TODO - Cleanup?  Close HBase resources?
+		// Clean up hbase resources
+		try { this.schemaTable.close(); } catch (Exception e) {}
+		try { this.dictionaryTable.close(); } catch (Exception e) {}
 	}
 
 	/**
@@ -598,7 +600,6 @@ public class HBaseSQLImport {
 			System.out.println(formatted);
 		}
 	}
-
 	
 	/**
 	  * Save a schema mapping to HBase.
@@ -847,26 +848,10 @@ public class HBaseSQLImport {
 		catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-			if (rs != null) {
-				try {
-					rs.close();
-				} catch (Exception e) {
-				}
-			}
-			if (stmt != null) {
-				try {
-					stmt.close();
-				} catch (Exception e) {
-				}
-			}
-			if (con != null) {
-				try {
-					con.close();
-				} catch (Exception e) {
-				}
-			}
+			try { rs.close(); } catch (Exception e) { }
+			try { stmt.close(); } catch (Exception e) { }
+			try { con.close(); } catch (Exception e) { }
 		}
-
 	}
 
 	/**
@@ -1038,9 +1023,7 @@ public class HBaseSQLImport {
 			}
 
 			// Close HTable
-			try {
-				htable.close();
-			} catch(Exception e) {}
+			try { htable.close(); } catch(Exception e) {}
 
 			// Close SQL resources
 			try { rs.close(); } catch (Exception e) { }
@@ -1095,16 +1078,18 @@ public class HBaseSQLImport {
 			FilterList filterList = 
 				new FilterList(FilterList.Operator.MUST_PASS_ONE);
 			
-			SingleColumnValueFilter tableFilter = new SingleColumnValueFilter(
-				f,
-				q,
-				CompareFilter.CompareOp.EQUAL, 
-				Bytes.toBytes(columnValue)
+			SingleColumnValueFilter tableFilter = 
+				new SingleColumnValueFilter(
+					f,
+					q,
+					CompareFilter.CompareOp.EQUAL, 
+					Bytes.toBytes(columnValue)
 			);
 			tableFilter.setFilterIfMissing(true);
 			filterList.addFilter(tableFilter);
 
-			// TODO - This only works for Strings.  Need to look up the dictionary
+			// TODO - This only works for Strings.  
+			// Need to look up the dictionary
 			// type and convert to int, etc.
 			
 			/*

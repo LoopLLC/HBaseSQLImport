@@ -500,6 +500,11 @@ public class HBaseHelper {
 			}
 
 			// Get the java.sql.Type for this column
+			
+			if (!columnNames.containsKey(colName)) {
+				throw new Exception("Missing schema column " + colName);
+			}
+
 			int columnType = columnNames.get(colName);
 
 			// Get the value from the result set
