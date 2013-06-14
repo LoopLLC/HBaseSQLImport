@@ -809,6 +809,15 @@ public class HBaseSQLImport {
 			System.out.format("%s.%s%n", schema, table);
 
 			StringBuffer selectSql = new StringBuffer();
+			selectSql.append(String.format(
+				"set transaction isolation level read uncommitted;%n"));
+			selectSql.append(String.format(
+				"set deadlock_priority low;%n"));
+			selectSql.append(String.format(
+				"set xact_abort on;%n"));
+			selectSql.append(String.format(
+				"set nocount on;%n%n"));
+
 			selectSql.append(String.format("select %n")); 
 
 			boolean first = true;
@@ -1240,6 +1249,9 @@ public class HBaseSQLImport {
 
 		// Click
 		// 0000000004_6D89B3CE-E4AC-460E-94D8-60D5533A86F2_9CC982A6-D010-4ED2-B840-0F9C54E1A6A1  
+
+		// ROI
+		// 0000000004_7FC7637A-E52A-4168-A7E7-E0470DD1E65F_885827C6-C50B-46FD-8730-61A34A5AF391  
 
 		// Put the table dictionary into a map keyed by
 		// nested column signature (cpn_n)
