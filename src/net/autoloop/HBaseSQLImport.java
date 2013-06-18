@@ -1208,6 +1208,7 @@ public class HBaseSQLImport {
 					System.out.println(Bytes.toFloat(value));
 					break;
 				case "decimal":
+				case "numeric":
 					System.out.println(Bytes.toBigDecimal(value));
 					break;
 				case "double":
@@ -1424,7 +1425,8 @@ public class HBaseSQLImport {
 		System.out.println("\t-c\tSQL Column Name");
 		System.out.println("\t-t\tData Type");
 		System.out.println("\t\tstring, int, boolean, byte, long");
-		System.out.println("\t\tdouble, float, datetime, decimal");
+		System.out.println("\t\tdouble, float, datetime, decimal, ");
+		System.out.println("\t\tnumeric ");
 		System.out.println("\t-k\tSQL Key");
 		System.out.println("\t-hbt\tHBase Table");
 

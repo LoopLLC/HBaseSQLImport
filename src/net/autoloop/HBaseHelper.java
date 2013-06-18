@@ -158,6 +158,7 @@ public class HBaseHelper {
 			case "guid": return java.sql.Types.CHAR; // String
 			case "short": return java.sql.Types.SMALLINT; // short
 			case "decimal": return java.sql.Types.DECIMAL; // Decimal
+			case "numeric": return java.sql.Types.NUMERIC; // Decimal
 			default: return 0;
 		}
 		// TODO - Convert this to a dictionary
@@ -428,6 +429,7 @@ public class HBaseHelper {
 				}
 				return Bytes.toBytes(date.getTime()); // long
 			case Types.DECIMAL:
+			case Types.NUMERIC:
 				java.math.BigDecimal bd = rs.getBigDecimal(columnName);
 				if (rs.wasNull()) {
 					return nullArray;
