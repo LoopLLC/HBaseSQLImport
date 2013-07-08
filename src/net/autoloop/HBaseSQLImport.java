@@ -1448,7 +1448,7 @@ public class HBaseSQLImport {
 		System.out.println("\t-sqldb\tSQL Database Name");
 		System.out.println("\t-sqlu\tSQL Username");
 		System.out.println();
-		System.out.println("\t-import FileName.sql -qn QueryName " + 
+		System.out.println("\t-import -qn QueryName " + 
 				"-sqlh Host -sqlu User -sqldb Database");
 		System.out.println("\t-schema SchemaFile.json");
 		System.out.println("");
