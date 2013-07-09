@@ -97,6 +97,20 @@ java HBaseSQLImport.jar
 
 	Import the data for -qn QueryName
 	
+*	-daily
+
+	For imports, add the SQL at the end of the file in a special comment section.  
+	
+	e.g.
+	
+	\-\- DAILY
+	
+	\-\- where InsertedOn > dateadd(d, -2, getdate())
+	
+	\-\- /DAILY
+	
+	This enables you to use the same schema file and SQL for both the initial import of all data, and also for the daily incremental addition of new records.  To handle more fine-grained updates to specific columns, you should simply write a new SQL query and a new JSON schema file to match it.
+	
 *	-schema FileName.json
 
 	Define the schema using a JSON file instead of typing each one out manually as a separate command.  This is how you will define schemas most of the time.  There should be a one to one relationship between JSON schema files and SQL import files.  If the same column is defined in multiple schema files, the most recent version wins.  The schema and dictionary entries will be overwritten each time the schema is saved.
