@@ -78,6 +78,7 @@ public class HBaseSQLImport {
 		boolean isScan = false;
 		boolean isGet = false;
 		boolean isExamples = false;
+		boolean isDaily = false;
 		String scanFilter = null;
 		String columnFilter = "*";
 		String getRowKey = null;
@@ -201,6 +202,9 @@ public class HBaseSQLImport {
 				case "-examples":
 					examples();
 					return;
+				case "-daily":
+					isDaily = true;
+					break;
 				default: break;
 			}
 		}
@@ -245,7 +249,7 @@ public class HBaseSQLImport {
 				usage();
 				return;
 			}
-			importSQL(description);	
+			importSQL(description, isDaily);	
 		} else if (isSchema) {
 			parseSchemaFile(schemaPath);	
 		} else if (isTest) {
@@ -866,7 +870,8 @@ public class HBaseSQLImport {
 	/**
 	 * Run the import SQL and write the data to HBase.
 	 */
-	private void importSQL(HBaseDescription description) throws Exception {
+	private void importSQL(HBaseDescription description, 
+			boolean isDaily) throws Exception {
 
 		// Get the table description and the list of columns
 		HBaseDescription tableDescription = null;
@@ -899,6 +904,36 @@ public class HBaseSQLImport {
 			con = DriverManager.getConnection(this.connectionString);
 
 			String sql = tableDescription.getQuery(); 
+
+			// If this is a daily incremental import, parse 
+			// out the addition to the SQL.
+			// 
+			// -- DAILY
+			// -- where x=y
+			// -- /DAILY
+
+			StringBuffer extra = new StringBuffer();
+			if (isDaily) {
+				StringReader sr = new StringReader(sql);
+				BufferedReader br = new BufferedReader(sr);
+				String line=null;
+				boolean isExtraSql = false;
+				while((line = br.readLine()) != null) {
+					if (line.indexOf("-- DAILY") == 0) {
+						isExtraSql = true;
+						continue;
+					}
+					if (line.indexOf("-- /DAILY") == 0) {
+						isExtraSql = false;
+						continue;
+					}
+					if (isExtraSql) {
+						extra.append(String.format("%s%n", 
+							line.replace("--", "")));	
+					}
+				}
+				sql += String.format("%n%s", extra.toString());
+			}
 
 			System.out.format("Running the following query:%n%s%n", sql);
 					
@@ -1450,6 +1485,11 @@ public class HBaseSQLImport {
 		System.out.println();
 		System.out.println("\t-import -qn QueryName " + 
 				"-sqlh Host -sqlu User -sqldb Database");
+		System.out.println("\t\tRun the SQL and import data into HBase");
+		System.out.println(
+			"\t-daily\tImport with the addition of optional ");
+		System.out.println(
+			"\t\tSQL at the end of the file to limit results");
 		System.out.println("\t-schema SchemaFile.json");
 		System.out.println("");
 		System.out.println("\t-get RowKey -hbt TableName");
