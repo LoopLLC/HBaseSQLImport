@@ -19,45 +19,45 @@ public class HBaseColumn implements Comparable<HBaseColumn> {
 	
 	public void validate(String type) throws Exception {
 		
-		switch (type) {
-			case "Table":
-				break;
-			case "Column":
-				if (StringUtils.isBlank(this.columnFamily)) {
-					throw new Exception(
-						"-hbc HBaseCF must be given for -ty Column");
-				}
-				if (StringUtils.isBlank(this.qualifier)) {
-					throw new Exception(
-					"-hbq HBaseQualifier must be given for -ty Column");
-				}
-				if (StringUtils.isBlank(this.dataType)) {
-					throw new Exception(
-						"-t SQL Type must be set for -ty Column");
-				}
-				List<String> validTypes = new ArrayList<>();
-				validTypes.add("int");
-				validTypes.add("string");
-				validTypes.add("nstring");
-				validTypes.add("boolean");
-				validTypes.add("long");
-				validTypes.add("float");
-				validTypes.add("double");
-				validTypes.add("datetime");
-				validTypes.add("byte");
-				validTypes.add("guid");
-				validTypes.add("short");
-				validTypes.add("decimal");
-				validTypes.add("numeric");
-				if (!validTypes.contains(this.dataType)) {
-					throw new Exception("Invalid -t SQL Type");
-				}
-				if (StringUtils.isBlank(this.sqlColumnName)) {
-					throw new Exception(
-						"-c SQL Column Name must be set for -ty Column");
-				}
-				break;
-			default: throw new Exception("Unexpected type");
+		if (type == null) throw new Exception("type is null");
+		
+		if (type.equals("Column")) {
+
+			if (StringUtils.isBlank(this.columnFamily)) {
+				throw new Exception(
+					"-hbc HBaseCF must be given for -ty Column");
+			}
+			if (StringUtils.isBlank(this.qualifier)) {
+				throw new Exception(
+				"-hbq HBaseQualifier must be given for -ty Column");
+			}
+			if (StringUtils.isBlank(this.dataType)) {
+				throw new Exception(
+					"-t SQL Type must be set for -ty Column");
+			}
+			List<String> validTypes = new ArrayList<String>();
+			validTypes.add("int");
+			validTypes.add("string");
+			validTypes.add("nstring");
+			validTypes.add("boolean");
+			validTypes.add("long");
+			validTypes.add("float");
+			validTypes.add("double");
+			validTypes.add("datetime");
+			validTypes.add("byte");
+			validTypes.add("guid");
+			validTypes.add("short");
+			validTypes.add("decimal");
+			validTypes.add("numeric");
+			if (!validTypes.contains(this.dataType)) {
+				throw new Exception("Invalid -t SQL Type");
+			}
+			if (StringUtils.isBlank(this.sqlColumnName)) {
+				throw new Exception(
+					"-c SQL Column Name must be set for -ty Column");
+			}
+		} else if (!type.equals("Table")) {
+			throw new Exception("Unexpected type: " + type);
 		}
 	}
 

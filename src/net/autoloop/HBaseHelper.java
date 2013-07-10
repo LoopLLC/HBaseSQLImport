@@ -5,9 +5,6 @@ import java.io.*;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
  
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
@@ -62,49 +59,36 @@ public class HBaseHelper {
 		for (KeyValue kv:r.raw()) {
 			String qualifier = new String(kv.getQualifier());
 			String value = new String(kv.getValue());
-			switch (qualifier) {
-				case "qn": // Query Name
-					d.setQueryName(value);
-					break;
-				case "q": // The SQL query
-					d.setQuery(value);
-					break;
-				case "k":
-					d.setSqlKey(value);
-					break;
-				case "hbt":
-					d.setTableName(value);
-					break;
-				case "hbcf":
-					c.setColumnFamily(value);
-					break;
-				case "hbq":
-					c.setQualifier(value);
-					break;
-				case "c":
-					c.setSqlColumnName(value);
-					break;
-				case "t":
-					c.setDataType(value);
-					break;
-				case "hbl":
-					c.setLogicalName(value);
-					break;
-				case "hbd":
-					c.setDescription(value);
-					break;
-				case "ty":
-					d.setType(value);
-					break;
-				case "hbn":
-					if ("true".equals(value)) {
-						c.setIsNested(true);
-					} else {
-						c.setIsNested(false);
-					}
-					break;
-				default: break;
+			if (qualifier.equals("qn")) {
+				d.setQueryName(value);
+			} else if (qualifier.equals("q")) {
+				d.setQuery(value);
+			} else if (qualifier.equals("k")) {
+				d.setSqlKey(value);
+			} else if (qualifier.equals("hbt")) {
+				d.setTableName(value);
+			} else if (qualifier.equals("hbcf")) {
+				c.setColumnFamily(value);
+			} else if (qualifier.equals("hbq")) {
+				c.setQualifier(value);
+			} else if (qualifier.equals("c")) {
+				c.setSqlColumnName(value);
+			} else if (qualifier.equals("t")) {
+				c.setDataType(value);
+			} else if (qualifier.equals("hbl")) {
+				c.setLogicalName(value);
+			} else if (qualifier.equals("hbd")) {
+				c.setDescription(value);
+			} else if (qualifier.equals("ty")) {
+				d.setType(value);
+			} else if (qualifier.equals("hbn")) {
+				if ("true".equals(value)) {
+					c.setIsNested(true);
+				} else {
+					c.setIsNested(false);
+				}
 			}
+		
 		}
 		
 		return d;
@@ -145,22 +129,24 @@ public class HBaseHelper {
 	 * Get the java sql type that corresponds to the HBase column type name.
 	 */
 	public static int getJavaSqlDataType(String dataType) {
-		switch (dataType) {
-			case "int": return java.sql.Types.INTEGER; // int
-			case "long": return java.sql.Types.BIGINT; // long
-			case "string": return java.sql.Types.VARCHAR; // String
-			case "nstring": return java.sql.Types.NVARCHAR; // String
-			case "double": return java.sql.Types.DOUBLE; // double
-			case "float": return java.sql.Types.FLOAT; // float
-			case "boolean": return java.sql.Types.BIT; // boolean
-			case "byte": return java.sql.Types.TINYINT; // byte
-			case "datetime": return java.sql.Types.TIMESTAMP; // Date (long)
-			case "guid": return java.sql.Types.CHAR; // String
-			case "short": return java.sql.Types.SMALLINT; // short
-			case "decimal": return java.sql.Types.DECIMAL; // Decimal
-			case "numeric": return java.sql.Types.NUMERIC; // Decimal
-			default: return 0;
-		}
+		
+		if (dataType.equals("int")) return java.sql.Types.INTEGER; // int
+		if (dataType.equals("long")) return java.sql.Types.BIGINT; // long
+		if (dataType.equals("string")) return java.sql.Types.VARCHAR; // String
+		if (dataType.equals("nstring")) return java.sql.Types.NVARCHAR; // String
+		if (dataType.equals("double")) return java.sql.Types.DOUBLE; // double
+		if (dataType.equals("float")) return java.sql.Types.FLOAT; // float
+		if (dataType.equals("boolean")) return java.sql.Types.BIT; // boolean
+		if (dataType.equals("byte")) return java.sql.Types.TINYINT; // byte
+		if (dataType.equals("datetime")) return java.sql.Types.TIMESTAMP; // Date (long)
+		if (dataType.equals("guid")) return java.sql.Types.CHAR; // String
+		if (dataType.equals("short")) return java.sql.Types.SMALLINT; // short
+		if (dataType.equals("decimal")) return java.sql.Types.DECIMAL; // Decimal
+		if (dataType.equals("numeric")) return java.sql.Types.NUMERIC; // Decimal
+		
+		return 0;
+		
+		
 		// TODO - Convert this to a dictionary
 
 		// TODO - Document "HBSQLI Type" - "Java Type" - "SQL Type"
@@ -183,30 +169,28 @@ public class HBaseHelper {
 		for (KeyValue kv:r.raw()) {
 			String qualifier = new String(kv.getQualifier());
 			String value = new String(kv.getValue());
-			switch (qualifier) {
-				case "table": 
-					d.setTable(value);
-					break;
-				case "family": 
-					d.setFamily(value);
-					break;
-				case "qualifier": 
-					d.setQualifier(value);
-					break;
-				case "name": 
-					d.setName(value);
-					break;
-				case "description": 
-					d.setDescription(value);
-					break;
-				case "nested": 
-					d.setNested(value);
-					break;
-				case "type": 
-					d.setType(value);
-					break;
-				default: break;
-			}
+			
+			if (qualifier.equals("table"))
+				d.setTable(value);
+			
+			if (qualifier.equals("family"))
+				d.setFamily(value);
+			
+			if (qualifier.equals("qualifier"))
+				d.setQualifier(value);
+			
+			if (qualifier.equals("name"))
+				d.setName(value);
+			
+			if (qualifier.equals("description"))
+				d.setDescription(value);
+			
+			if (qualifier.equals("nested"))
+				d.setNested(value);
+			
+			if (qualifier.equals("type"))
+				d.setType(value);
+				
 		}
 
 		return d;
@@ -555,7 +539,7 @@ public class HBaseHelper {
 
 		String[] tokens = template.split("_");
 
-		List<String> retval = new ArrayList<>();
+		List<String> retval = new ArrayList<String>();
 
 		boolean braces = false;
 		StringBuffer sb = new StringBuffer();
@@ -715,7 +699,7 @@ public class HBaseHelper {
 		getNestedTables(List<HBaseDictionary> list) throws Exception {
 
 		HashMap<String, HashMap<String, HBaseDictionary>> nestedTables = 
-			new HashMap<> ();
+			new HashMap<String, HashMap<String, HBaseDictionary>> ();
 
 		for (HBaseDictionary d : list) {
 		
@@ -730,7 +714,7 @@ public class HBaseHelper {
 				if (nestedTables.containsKey(nestedTableName)) {
 					columns = nestedTables.get(nestedTableName);
 				} else {
-					columns = new HashMap<>();
+					columns = new HashMap<String, HBaseDictionary>();
 					nestedTables.put(nestedTableName, columns);
 				}			
 
@@ -803,6 +787,20 @@ public class HBaseHelper {
 		}
 
 		return qualifier.substring(0, idx);
+	}
+	
+	/**
+	 * Read the complete contents of a text file into a String.
+	 * @param path
+	 * @return 
+	 */
+	public static String readFile(String path) {
+		Scanner sc = new Scanner (path);
+		StringBuffer buf = new StringBuffer();
+		while (sc.hasNext ()) {
+			buf.append (String.format("%s%n", sc.nextLine()));
+		}
+		return buf.toString();
 	}
 }
 

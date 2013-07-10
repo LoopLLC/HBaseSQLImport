@@ -27,26 +27,27 @@ public class HBaseDescription implements Comparable<HBaseDescription> {
 			throw new Exception("-ty Type is required (Table or Column)");
 		}
 		
-		switch (this.type) {
-			case "Table":
-				if (StringUtils.isBlank(this.query)) {
-					throw new Exception(
-							"-q QueryFile must be given for -ty Table");
-				}
-				if (StringUtils.isBlank(this.sqlKey)) {
-					throw new Exception(
-							"-k SQLKey must be given for -ty Table");
-				}
-				if (StringUtils.isBlank(this.tableName)) {
-					throw new Exception(
-							"-hbt HBaseTable must be given for -ty Table");
-				}
+		if (this.type == null) {
+			throw new Exception("type is null");
+		}
 		
-				break;
-			case "Column":
-				break;
-			default: throw new Exception(
-					"Unexpected type, should be Table or Column");
+		if (!(this.type.equals("Column") || this.type.equals("Table"))) {
+			throw new Exception("Unexpected type: " + this.type);
+		}
+		
+		if (this.type.equals("Table")) {
+			if (StringUtils.isBlank(this.query)) {
+				throw new Exception(
+						"-q QueryFile must be given for -ty Table");
+			}
+			if (StringUtils.isBlank(this.sqlKey)) {
+				throw new Exception(
+						"-k SQLKey must be given for -ty Table");
+			}
+			if (StringUtils.isBlank(this.tableName)) {
+				throw new Exception(
+						"-hbt HBaseTable must be given for -ty Table");
+			}
 		}
 		
 		if (this.hbaseColumn == null) {

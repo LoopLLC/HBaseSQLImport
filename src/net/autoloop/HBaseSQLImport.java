@@ -5,9 +5,6 @@ import java.io.*;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
  
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
@@ -98,115 +95,143 @@ public class HBaseSQLImport {
 		// Parse command line args
 		for (int i = 0; i < args.length; i++) {
 			String arg = args[i].toLowerCase();
-			switch (arg) {
-				case "-qn": // Query Name
-					description.setQueryName(args[++i]);
-					break;
-				case "-q": // Query File
-					String queryFile = args[++i];
-					byte[] encoded = 
-						Files.readAllBytes(Paths.get(queryFile));
-					description.setQuery(StandardCharsets.UTF_8
-							.decode(ByteBuffer.wrap(encoded)).toString());
-					break;
-				case "-ty": // Schema row type "Table" or "Column"
-					description.setType(args[++i]);
-					break;
-				case "-k":
-					description.setSqlKey(args[++i]);
-					break;
-				case "-hbt":
-					description.setTableName(args[++i]);
-					break;
-				case "-hbcf":
-					c.setColumnFamily(args[++i]);
-					break;
-				case "-hbq":
-					c.setQualifier(args[++i]);
-					break;
-				case "-c":
-					c.setSqlColumnName(args[++i]);
-					break;
-				case "-t":
-					c.setDataType(args[++i]);
-					break;
-				case "-hbl":
-					c.setLogicalName(args[++i]);
-					break;
-				case "-hbd":
-					c.setDescription(args[++i]);
-					break;
-				case "-save":
-					isSave = true;
-					break;
-				case "-show":
-					isShow = true;
-					break;
-				case "-query":
-					showQuery = true;
-					break;
-				case "-delete":
-					isDelete = true;
-					break;
-				case "-format":
-					isFormatted = true;
-					break;
-				case "-sqld":
-					isSqlDescribe = true;
-					sqlSchema = args[++i];
-					sqlTable = args[++i];
-					break;
-				case "-sqlg":
-					isSqlGenerate = true;
-					break;
-				case "-sqlh":
-					this.sqlHost = args[++i];
-					break;
-				case "-sqlu":
-					this.sqlUser = args[++i];
-					break;
-				case "-sqldb":
-					this.sqlDatabase = args[++i];
-					break;
-				case "-sqlp":
-					this.sqlPassword = args[++i];
-					break;
-				case "-hbn":
-					c.setIsNested(true);
-					break;
-				case "-import":
-					isImport = true;
-					break;
-				case "-schema":
-					isSchema = true;
-					schemaPath = args[++i];
-					break;
-				case "-test":
-					isTest = true;
-					break;
-				case "-dictionary":
-					isShowDictionary = true;
-					tableName = args[++i];
-					break;
-				case "-scan":
-					isScan = true;
-				 	scanFilter = args[++i];
-					break;
-				case "-columns":
-					columnFilter = args[++i];
-					break;
-				case "-get":
-					isGet = true;
-					getRowKey = args[++i];
-					break;	
-				case "-examples":
-					examples();
-					return;
-				case "-daily":
-					isDaily = true;
-					break;
-				default: break;
+
+			if (arg.equals("-qn")) { // Query Name
+				description.setQueryName(args[++i]);
+				continue;
 			}
+			if (arg.equals("-q")) { // Query File
+				String queryFile = args[++i];
+				description.setQuery(HBaseHelper.readFile(queryFile));
+				continue;
+			}
+			if (arg.equals("-ty")) { // Schema row type "Table" or "Column"
+				description.setType(args[++i]);
+				continue;
+			}
+			if (arg.equals("-k")) {
+				description.setSqlKey(args[++i]);
+				continue;
+			}
+			if (arg.equals("-hbt")) {
+				description.setTableName(args[++i]);
+				continue;
+			}
+			if (arg.equals("-hbcf")) {
+				c.setColumnFamily(args[++i]);
+				continue;
+			}
+			if (arg.equals("-hbq")) {
+				c.setQualifier(args[++i]);
+				continue;
+			}
+			if (arg.equals("-c")) {
+				c.setSqlColumnName(args[++i]);
+				continue;
+			}
+			if (arg.equals("-t")) {
+				c.setDataType(args[++i]);
+				continue;
+			}
+			if (arg.equals("-hbl")) {
+				c.setLogicalName(args[++i]);
+				continue;
+			}
+			if (arg.equals("-hbd")) {
+				c.setDescription(args[++i]);
+				continue;
+			}
+			if (arg.equals("-save")) {
+				isSave = true;
+				continue;
+			}
+			if (arg.equals("-show")) {
+				isShow = true;
+				continue;
+			}
+			if (arg.equals("-query")) {
+				showQuery = true;
+				continue;
+			}
+			if (arg.equals("-delete")) {
+				isDelete = true;
+				continue;
+			}
+			if (arg.equals("-format")) {
+				isFormatted = true;
+				continue;
+			}
+			if (arg.equals("-sqld")) {
+				isSqlDescribe = true;
+				sqlSchema = args[++i];
+				sqlTable = args[++i];
+				continue;
+			}
+			if (arg.equals("-sqlg")) {
+				isSqlGenerate = true;
+				continue;
+			}
+			if (arg.equals("-sqlh")) {
+				this.sqlHost = args[++i];
+				continue;
+			}
+			if (arg.equals("-sqlu")) {
+				this.sqlUser = args[++i];
+				continue;
+			}
+			if (arg.equals("-sqldb")) {
+				this.sqlDatabase = args[++i];
+				continue;
+			}
+			if (arg.equals("-sqlp")) {
+				this.sqlPassword = args[++i];
+				continue;
+			}
+			if (arg.equals("-hbn")) {
+				c.setIsNested(true);
+				continue;
+			}
+			if (arg.equals("-import")) {
+				isImport = true;
+				continue;
+			}
+			if (arg.equals("-schema")) {
+				isSchema = true;
+				schemaPath = args[++i];
+				continue;
+			}
+			if (arg.equals("-test")) {
+				isTest = true;
+				continue;
+			}
+			if (arg.equals("-dictionary")) {
+				isShowDictionary = true;
+				tableName = args[++i];
+				continue;
+			}
+			if (arg.equals("-scan")) {
+				isScan = true;
+				scanFilter = args[++i];
+				continue;
+			}
+			if (arg.equals("-columns")) {
+				columnFilter = args[++i];
+				continue;
+			}
+			if (arg.equals("-get")) {
+				isGet = true;
+				getRowKey = args[++i];
+				continue;	
+			}
+			if (arg.equals("-examples")) {
+				examples();
+				return;
+			}
+			if (arg.equals("-daily")) {
+				isDaily = true;
+				continue;
+			}
+			
 		}
 
 		if (isSqlDescribe || isImport) {
@@ -300,11 +325,7 @@ public class HBaseSQLImport {
 	void parseSchemaFile(String path) throws Exception {
 
 		// Read the schema file
-		byte[] encoded = Files.readAllBytes(Paths.get(path));
-
-		// Convert it to a String
-		String json = StandardCharsets.UTF_8
-						.decode(ByteBuffer.wrap(encoded)).toString();
+		String json = HBaseHelper.readFile(path);
 
 		// Set up Gson
 		Type collectionType = 
@@ -315,7 +336,7 @@ public class HBaseSQLImport {
 		Collection<HBaseJsonSchema> list = 
 			gson.fromJson(json, collectionType);
 
-		List<String> qualifiers = new ArrayList<>();
+		List<String> qualifiers = new ArrayList<String>();
 
 		// Save each description to the HBase schema table
 		for (HBaseJsonSchema j:list) {
@@ -353,10 +374,7 @@ public class HBaseSQLImport {
 			if (d.getType().equals("Table")) {
 				String queryFile = d.getQuery();
 
-				byte[] encodedSql = 
-					Files.readAllBytes(Paths.get(queryFile));
-				d.setQuery(StandardCharsets.UTF_8
-						.decode(ByteBuffer.wrap(encodedSql)).toString());
+				d.setQuery(HBaseHelper.readFile(queryFile));
 			}
 
 			putDescription(d);
@@ -367,7 +385,7 @@ public class HBaseSQLImport {
 	 * Delete an entry from the HBase schema table.
 	 */
 	void deleteMapping(HBaseDescription description) throws Exception {
-		List<Delete> list = new ArrayList< >();
+		List<Delete> list = new ArrayList<Delete>();
 		String rowKey = description.getRowKey();
 		Delete del = new Delete(rowKey.getBytes());
 		list.add(del);
@@ -501,7 +519,7 @@ public class HBaseSQLImport {
 	  */
 	List<HBaseDescription> getSchemaColumns(ResultScanner ss) {
 
-		List<HBaseDescription> columns = new ArrayList< >();
+		List<HBaseDescription> columns = new ArrayList<HBaseDescription>();
 		for(Result r:ss) {
 			HBaseDescription d = HBaseHelper.getDescriptionFromResult(r);
 			if (d.getType() ==  null) {
@@ -519,7 +537,7 @@ public class HBaseSQLImport {
 	 */
 	List<HBaseDictionary> getDictionaryColumns(ResultScanner ss) 
 		throws Exception {
-		List<HBaseDictionary> columns = new ArrayList<>();
+		List<HBaseDictionary> columns = new ArrayList<HBaseDictionary>();
 		for (Result r:ss) {
 			HBaseDictionary d = HBaseHelper.getDictionaryFromResult(r);
 			columns.add(d);
@@ -546,7 +564,7 @@ public class HBaseSQLImport {
 		
 		HBaseDescription tableDescription = null;
 		List<HBaseDescription> list = getSchemaColumns(ss);
-		List<HBaseDescription> columns = new ArrayList< >();
+		List<HBaseDescription> columns = new ArrayList<HBaseDescription>();
 		for (HBaseDescription d:list) {
 			if (d.getType().equals("Table")) {
 				tableDescription = d;
@@ -628,18 +646,17 @@ public class HBaseSQLImport {
 	private void putDescription(HBaseDescription d) throws Exception {
 		
 		HBaseColumn c = d.getHbaseColumn();
-		HashMap<String, String> values = new HashMap< >();
+		HashMap<String, String> values = new HashMap<String, String>();
 		 
 		values.put("qn", d.getQueryName());
 		values.put("hbt", d.getTableName());
 		values.put("ty", d.getType());
 		
-		switch (d.getType()) {
-			case "Table":
+		String t = d.getType();
+		if (t.equals("Table")) {
 				values.put("q", d.getQuery());
 				values.put("k", d.getSqlKey());
-				break;
-			case "Column":
+		} else if (t.equals("Column")) {
 				values.put("c", c.getSqlColumnName());
 				values.put("t", c.getDataType());
 				values.put("hbcf", c.getColumnFamily());
@@ -647,8 +664,6 @@ public class HBaseSQLImport {
 				values.put("hbl", c.getLogicalName());
 				values.put("hbd", c.getDescription());
 				values.put("hbn", c.getIsNested() ? "true" : "false");
-				break;
-			default: break;
 		}
 		
 		put(this.schemaTable, d.getRowKey(), "d", values);
@@ -672,7 +687,7 @@ public class HBaseSQLImport {
 		// to we need to look it up in the HBase schema table.
 		String tableName = getTableNameForQuery(d.getQueryName());
 		
-		HashMap<String, String> values = new HashMap< >();
+		HashMap<String, String> values = new HashMap<String, String>();
 		values.put("table", tableName);
 		values.put("type", c.getDataType());
 		values.put("family", c.getColumnFamily());
@@ -805,7 +820,7 @@ public class HBaseSQLImport {
 
 			ResultSetMetaData rsmd = rs.getMetaData();
 			int numColumns = rsmd.getColumnCount();
-			List<String> columnNames = new ArrayList< >();
+			List<String> columnNames = new ArrayList<String>();
 			for (int i = 1 ; i <= numColumns; i++) {
 				columnNames.add(rsmd.getColumnName(i));
 			}
@@ -877,7 +892,7 @@ public class HBaseSQLImport {
 		HBaseDescription tableDescription = null;
 		List<HBaseDescription> list = 
 			getSchemaColumns(getSchemaScanner(description));
-		HashMap<String, HBaseColumn> columns = new HashMap< >();
+		HashMap<String, HBaseColumn> columns = new HashMap<String, HBaseColumn>();
 		for (HBaseDescription d:list) {
 			if (d.getType().equals("Table")) {
 				tableDescription = d;
@@ -944,7 +959,7 @@ public class HBaseSQLImport {
 			// this against the mappings that are stored in HBase.
 			ResultSetMetaData rsmd = rs.getMetaData();
 			int numColumns = rsmd.getColumnCount();
-			HashMap<String, Integer> columnNames = new HashMap< >();
+			HashMap<String, Integer> columnNames = new HashMap<String, Integer>();
 			for (int i = 1 ; i <= numColumns; i++) {
 				String columnName = rsmd.getColumnName(i);
 				HBaseColumn hbColumn = columns.get(columnName);
@@ -1222,48 +1237,44 @@ public class HBaseSQLImport {
 			System.out.println("[NULL]");
 		} else {
 			String t = d.getType();
-			switch (t) {
-				
-				case "boolean":
-					System.out.println(Bytes.toBoolean(value));
-					break;
-				case "byte":
-					System.out.println(value[0]);
-					break;
-				case "short":
-					System.out.println(Bytes.toShort(value));
-					break; 
-				case "int":
-					System.out.println(Bytes.toInt(value));
-					break;
-				case "long":
-					System.out.println(Bytes.toLong(value));
-					break;
-				case "float":
-					System.out.println(Bytes.toFloat(value));
-					break;
-				case "decimal":
-				case "numeric":
-					System.out.println(Bytes.toBigDecimal(value));
-					break;
-				case "double":
-					System.out.println(Bytes.toDouble(value));
-					break;
-				case "datetime":
-					System.out.println(
-						new java.util.Date(Bytes.toLong(value)));
-					break;
-				case "guid":
-				case "string":
-				case "nstring":
-					String str = Bytes.toString(value);
-					str = str.replace("\r", "\\r");
-					str = str.replace("\n", "\\n");
-					System.out.println(str);
-					break;
-				default: System.out.println(
-					"Unexpected type: " + t);
+			
+			if (t.equals("boolean")) {
+				System.out.println(Bytes.toBoolean(value));
+			} else 
+			if (t.equals("byte")) {
+				System.out.println(value[0]);
+			} else 
+			if (t.equals("short")) {
+				System.out.println(Bytes.toShort(value));
+			} else  
+			if (t.equals("int")) {
+				System.out.println(Bytes.toInt(value));
+			} else 
+			if (t.equals("long")) {
+				System.out.println(Bytes.toLong(value));
+			} else 
+			if (t.equals("float")) {
+				System.out.println(Bytes.toFloat(value));
+			} else 
+			if (t.equals("decimal") || t.equals("numeric")) {
+				System.out.println(Bytes.toBigDecimal(value));
+			} else 
+			if (t.equals("double")) {
+				System.out.println(Bytes.toDouble(value));
+			} else 
+			if (t.equals("datetime")) {
+				System.out.println(
+					new java.util.Date(Bytes.toLong(value)));
+			} else 
+			if (t.equals("guid") || t.equals("string") || t.equals("nstring")) {
+				String str = Bytes.toString(value);
+				str = str.replace("\r", "\\r");
+				str = str.replace("\n", "\\n");
+				System.out.println(str);
+			} else {
+				System.out.println("Unexpected type: " + t);
 			}
+			
 		}
 	}
 
@@ -1313,7 +1324,7 @@ public class HBaseSQLImport {
 		throws Exception {
 
 		// Map of all columns
-		HashMap<String, HBaseDictionary> map = new HashMap<>();
+		HashMap<String, HBaseDictionary> map = new HashMap<String, HBaseDictionary>();
 
 		for (HBaseDictionary d:columnList) {
 			map.put(HBaseHelper.getNestedSignature(d.getQualifier()), d);
@@ -1375,9 +1386,9 @@ public class HBaseSQLImport {
 
 		// Map of tableName_Value -> list of KeyValue
 		// e.g. all KeyValues for cpn_001
-		HashMap<String, List<KeyValue>> rows = new HashMap<>();
+		HashMap<String, List<KeyValue>> rows = new HashMap<String, List<KeyValue>>();
 
-		List<String> nestedKeys = new ArrayList<>();
+		List<String> nestedKeys = new ArrayList<String>();
 
 		// Iterate through all KeyValues, and add the nested ones
 		// to the row that matches the nested row key.
@@ -1403,7 +1414,7 @@ public class HBaseSQLImport {
 			if (rows.containsKey(nestedKey)) {
 				row = rows.get(nestedKey);
 			} else {
-				row = new ArrayList<>();
+				row = new ArrayList<KeyValue>();
 				rows.put(nestedKey, row);
 				nestedKeys.add(nestedKey);
 			}
