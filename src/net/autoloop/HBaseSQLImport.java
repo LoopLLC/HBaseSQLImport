@@ -376,7 +376,11 @@ public class HBaseSQLImport {
 			if (d.getType().equals("Table")) {
 				String queryFile = d.getQuery();
 
-				d.setQuery(HBaseHelper.readFile(queryFile));
+				String sql = HBaseHelper.readFile(queryFile);
+
+				System.out.println(sql);
+
+				d.setQuery(sql);
 			}
 
 			putDescription(d);
@@ -439,6 +443,7 @@ public class HBaseSQLImport {
 		list.addFilter(tableFilter);
 		
 		// Get the column maps
+		/*
 		RegexStringComparator comp = 
 			new RegexStringComparator("^" + 
 					description.getQueryName() + "_*");   
@@ -450,6 +455,7 @@ public class HBaseSQLImport {
 				comp
 				);
 		list.addFilter(columnFilter);
+		*/
 		
 		s.setFilter(list);
 		
@@ -894,7 +900,8 @@ public class HBaseSQLImport {
 		HBaseDescription tableDescription = null;
 		List<HBaseDescription> list = 
 			getSchemaColumns(getSchemaScanner(description));
-		HashMap<String, HBaseColumn> columns = new HashMap<String, HBaseColumn>();
+		HashMap<String, HBaseColumn> columns = 
+			new HashMap<String, HBaseColumn>();
 		for (HBaseDescription d:list) {
 			if (d.getType().equals("Table")) {
 				tableDescription = d;
