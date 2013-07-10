@@ -31,7 +31,7 @@
 				<attribute 	name="Main-Class" 
 							value="net.autoloop.HBaseSQLImport" />
 				<attribute 	name="Class-Path"
-							value="commons-configuration-1.6.jar hadoop-core-1.1.2.jar hbase-0.94.7.jar protobuf-java-2.4.0a.jar commons-io-2.1.jar slf4j-api-1.4.3.jar commons-lang-2.4.jar slf4j-log4j12-1.4.3.jar commons-logging-1.1.1.jar zookeeper-3.4.5.jar gson-2.2.4.jar log4j-1.2.15.jar" />
+							value="commons-configuration-1.6.jar hadoop-core-1.1.2.jar hbase-0.94.7.jar protobuf-java-2.4.0a.jar commons-io-2.1.jar slf4j-api-1.4.3.jar commons-lang-2.4.jar slf4j-log4j12-1.4.3.jar commons-logging-1.1.1.jar zookeeper-3.4.5.jar gson-2.2.4.jar log4j-1.2.15.jar sqljdbc.jar" />
 			</manifest>
 		</jar>
 		<copy todir="dist">
