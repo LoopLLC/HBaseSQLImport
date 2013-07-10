@@ -327,6 +327,8 @@ public class HBaseSQLImport {
 		// Read the schema file
 		String json = HBaseHelper.readFile(path);
 
+		//System.out.println(json);
+
 		// Set up Gson
 		Type collectionType = 
 			new TypeToken<Collection<HBaseJsonSchema>>(){}.getType();

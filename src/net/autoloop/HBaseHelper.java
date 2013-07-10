@@ -794,8 +794,8 @@ public class HBaseHelper {
 	 * @param path
 	 * @return 
 	 */
-	public static String readFile(String path) {
-		Scanner sc = new Scanner (path);
+	public static String readFile(String path) throws Exception {
+		Scanner sc = new Scanner(new File(path));
 		StringBuffer buf = new StringBuffer();
 		while (sc.hasNext ()) {
 			buf.append (String.format("%s%n", sc.nextLine()));
