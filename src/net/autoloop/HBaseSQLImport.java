@@ -28,19 +28,160 @@ import java.lang.reflect.*;
  *
  * @author ericzbeard
  */
-public class HBaseSQLImport {
+public class HBaseSQLImport implements Runnable {
 
 	/**
 	 * @param args the command line arguments
 	 */
 	public static void main(String[] args) throws Exception {
 
-		HBaseSQLImport hbsqli = new HBaseSQLImport();
-		hbsqli.run(args);
+		// Check to see if this is a "multi" invocation, where
+		// we read a file with multiple imports and then run
+		// them at the same time on separate threads.
+		String multiFile = null;
+		for (int i = 0; i < args.length; i++) {
+			String arg = args[i].toLowerCase();
+			if (arg.equals("-multi")) {
+				multiFile = args[++i];
+				break;
+			}
+		}
+
+		if (multiFile != null) {
+			
+			List<HBaseSQLThread> threads = new ArrayList<HBaseSQLThread>();
+		
+			// Open the JSON file and read the arguments for each 
+			// import, then run them all concurrently.
+
+			// Read the schema file
+			String json = HBaseHelper.readFile(multiFile);
+
+			// The schema file looks like this and is 
+			// represented by net.autoloop.HBaseMulti
+			//
+			// [
+			// {
+			// 		"qn": "ShortURL", 
+			// 		"sqlh": "windows1", 
+			// 		"sqlu": "hadoop", 
+			// 		"sqldb": "SurlEzb_00"
+			// }
+			// ...
+			// ]
+			//
+			
+			// All databases need to be using the same password
+			// so we can read it once from the command line 
+			// securely instead of embedding it in the JSON.
+
+			String sqlp = readPassword();
+
+			// Set up Gson
+			Type collectionType = 
+				new TypeToken<Collection<HBaseMulti>>(){}.getType();
+			Gson gson = new Gson();
+
+			// Deserialize the file
+			Collection<HBaseMulti> list = 
+				gson.fromJson(json, collectionType);
+
+			for (HBaseMulti multi : list) {
+
+				HBaseSQLImport hbsqli = new HBaseSQLImport();
+				
+				List<String> argList = new ArrayList<String>();
+				for (int i = 0; i < args.length; i++) {
+					String a = args[i].toLowerCase();
+					if (a.equals("-qn") || 
+						a.equals("-sqlh") || 
+						a.equals("-sqlu") || 
+						a.equals("-sqldb")) {
+						throw new Exception(
+								"Invalid arg with -multi: " + 
+								args[i]);
+						}
+					argList.add(args[i]);
+				}
+				
+				argList.add("-qn");
+				argList.add(multi.qn);
+
+				argList.add("-sqlh");
+				argList.add(multi.sqlh);
+
+				argList.add("-sqlu");
+				argList.add(multi.sqlu);
+
+				argList.add("-sqldb");
+				argList.add(multi.sqldb);
+
+				argList.add("-sqlp");
+				argList.add(sqlp);
+
+				// Set the altered args so that this instance 
+				// can run as if it were launched in the same 
+				// way from the command line.
+				hbsqli.args = argList.toArray(
+						new String[argList.size()]);
+
+				hbsqli.prefix = multi.qn + "." + 
+					multi.sqlh + "." + multi.sqldb + " ";
+
+				// Add the thread to a list so we can join them all later
+				HBaseSQLThread t = new HBaseSQLThread();
+				t.hbsqli = hbsqli;
+				threads.add(t);
 	
+				// Start the thread
+				t.start();
+			}
+
+			// Wait for all threads to complete
+			for (HBaseSQLThread t : threads) {
+				t.join();
+			}
+
+		} else {
+
+			// This is a regular invocation that does one import
+			HBaseSQLImport hbsqli = new HBaseSQLImport();
+			hbsqli.prefix = "";
+			hbsqli.args = args;
+			hbsqli.run();
+
+		}
+
+	}
+
+	/**
+	 * This class is used to run several hbsqli instances at once.
+	 */
+	public static class HBaseSQLThread extends Thread {
+		
+		public HBaseSQLImport hbsqli;
+
+		public void run() {
+			hbsqli.run();
+		}
 	}
 
 	public HBaseSQLImport() {}
+
+	public HBaseSQLImport(String[] args) {
+		this.args = args;
+	}
+
+	/**
+	 * Command line arguments.
+	 */
+	public String[] args;
+
+	/**
+	 * Console output needs to be prefixed so we know which
+	 * one is reporting when it's -multi.  qn.sqlh.sqldb 
+	 */
+	protected String prefix = "";
 
 	private Configuration config;
 	private HTable schemaTable;
@@ -52,14 +193,28 @@ public class HBaseSQLImport {
 	private String sqlPassword;
 
 	/**
-	 * Run the application.
+	 * Run the application (Runnable implementation).
+	 *
+	 * Requires command line args to be copied to this.args.
 	 */
-	void run(String[] args) throws Exception {
+	public void run() {
 		
+		try {
+			runInstance();
+		} catch (Exception ex) {
+			System.err.println(this.prefix);
+			ex.printStackTrace();
+		}
+	}
+
+	protected void runInstance() throws Exception {
+
 		if (args.length == 0) {
 			usage();
 			return;
 		}
+
+		System.out.println(this.prefix + "starting...");
 
 		boolean isSave = false;
 		boolean isShow = false;
@@ -251,7 +406,7 @@ public class HBaseSQLImport {
 
 			createConnectionString();
 
-		}
+		} 
 		
 		if (isSqlDescribe) {
 			sqlDescribe(sqlSchema, sqlTable, isSqlGenerate);
@@ -768,7 +923,7 @@ public class HBaseSQLImport {
 	/**
 	 * Get a password from the user, suppressing command line echo.
 	 */
-	String readPassword() {
+	public static String readPassword() {
 
 		Console cons;
  		char[] passwd;
@@ -959,7 +1114,8 @@ public class HBaseSQLImport {
 				sql += String.format("%n%s", extra.toString());
 			}
 
-			System.out.format("Running the following query:%n%s%n", sql);
+			System.out.format("%sRunning the following query:%n%s%n", 
+					this.prefix, sql);
 					
 			stmt = con.prepareStatement(sql);
 			rs = stmt.executeQuery();
@@ -968,15 +1124,17 @@ public class HBaseSQLImport {
 			// this against the mappings that are stored in HBase.
 			ResultSetMetaData rsmd = rs.getMetaData();
 			int numColumns = rsmd.getColumnCount();
-			HashMap<String, Integer> columnNames = new HashMap<String, Integer>();
+			HashMap<String, Integer> columnNames = 
+				new HashMap<String, Integer>();
 			for (int i = 1 ; i <= numColumns; i++) {
 				String columnName = rsmd.getColumnName(i);
 				HBaseColumn hbColumn = columns.get(columnName);
 
 				// Make sure we have this column in the HBase schema table
 				if (hbColumn == null) {
-					System.out.println("Could not find " + columnName + 
-							" in HBase schema mapping");
+					System.out.format("%sCould not find %s" +
+							" in HBase schema mapping%n", 
+							this.prefix, columnName);
 					continue;
 				}
 
@@ -986,19 +1144,20 @@ public class HBaseSQLImport {
 				if (rsType != HBaseHelper
 						.getJavaSqlDataType(hbColumn.getDataType())) {
 
-					System.out.println("Result Set Type " + 
+					System.out.format("%sResult Set Type " + 
 							rsType + 
 							" does not match HB schema type " + 
 							hbColumn.getDataType() + 
-							" for column " + 
-						   columnName);
+							" for column %n" + 
+						   columnName, 
+						   this.prefix);
 
 					continue;	
 
 				}
 
-				System.out.println("Adding " + columnName + 
-						" to column name list");
+				System.out.format("%sAdding " + columnName + 
+						" to column name list%n", this.prefix);
 
 				columnNames.put(columnName, rsType);
 			}
@@ -1070,13 +1229,16 @@ public class HBaseSQLImport {
 				totalRowsSaved++;
 
 				if (totalRowsSaved % 1000 == 0) {
-					System.out.println(
-							"Saved " + totalRowsSaved + " rows so far...");
+					System.out.format(
+							"%sSaved %s rows...%n", 
+							this.prefix, 
+						   	totalRowsSaved);
 				}
 					
 			}
 			
-			System.out.println("Done.  Saved " + totalRowsSaved + " rows");
+			System.out.format("%sDone.  Saved %s rows.%n", 
+				   this.prefix, totalRowsSaved);
 
 		} 
 		catch (Exception e) {
