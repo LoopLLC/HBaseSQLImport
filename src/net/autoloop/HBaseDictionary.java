@@ -40,6 +40,14 @@ public class HBaseDictionary implements Comparable<HBaseDictionary> {
 		return t + ":" + f + ":" + q;
 	}
 
+	public String getFQ() {
+		String f = this.family;
+		if (f == null) f = "";
+		String q = this.qualifier;
+		if (q == null) q = "";
+		return f + ":" + q;
+	}
+
 	public String getTable() { return this.table; }
 	public void setTable(String s) { this.table = s; }
 	

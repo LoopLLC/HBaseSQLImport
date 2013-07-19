@@ -39,11 +39,21 @@ public class HBaseSQLImport implements Runnable {
 		// we read a file with multiple imports and then run
 		// them at the same time on separate threads.
 		String multiFile = null;
+		String sqlu = null;
+		String sqlp = null;
 		for (int i = 0; i < args.length; i++) {
 			String arg = args[i].toLowerCase();
 			if (arg.equals("-multi")) {
 				multiFile = args[++i];
-				break;
+				continue;
+			}
+			if (arg.equals("-sqlu")) {
+				sqlu = args[++i];
+				continue;
+			}
+			if (arg.equals("-sqlp")) {
+				sqlp = args[++i];
+				continue;
 			}
 		}
 
@@ -64,18 +74,24 @@ public class HBaseSQLImport implements Runnable {
 			// {
 			// 		"qn": "ShortURL", 
 			// 		"sqlh": "windows1", 
-			// 		"sqlu": "hadoop", 
 			// 		"sqldb": "SurlEzb_00"
 			// }
 			// ...
 			// ]
 			//
 			
-			// All databases need to be using the same password
-			// so we can read it once from the command line 
+			// All databases need to be using the same username/password
+			// so we can read them once from the command line 
 			// securely instead of embedding it in the JSON.
 
-			String sqlp = readPassword();
+			// Read the password securely now if it wasn't provided
+			if (sqlp == null) {
+				sqlp = readPassword();
+			}
+
+			if (sqlu == null) {
+				throw new Exception("-sqlu required for -multi");
+			}
 
 			// Set up Gson
 			Type collectionType = 
@@ -95,7 +111,6 @@ public class HBaseSQLImport implements Runnable {
 					String a = args[i].toLowerCase();
 					if (a.equals("-qn") || 
 						a.equals("-sqlh") || 
-						a.equals("-sqlu") || 
 						a.equals("-sqldb")) {
 						throw new Exception(
 								"Invalid arg with -multi: " + 
@@ -110,11 +125,11 @@ public class HBaseSQLImport implements Runnable {
 				argList.add("-sqlh");
 				argList.add(multi.sqlh);
 
-				argList.add("-sqlu");
-				argList.add(multi.sqlu);
-
 				argList.add("-sqldb");
 				argList.add(multi.sqldb);
+
+				argList.add("-sqlu");
+				argList.add(sqlu);
 
 				argList.add("-sqlp");
 				argList.add(sqlp);
@@ -182,6 +197,8 @@ public class HBaseSQLImport implements Runnable {
 	 * one is reporting when it's -multi.  qn.sqlh.sqldb 
 	 */
 	protected String prefix = "";
+
+	public static boolean s_isVerbose = false;
 
 	private Configuration config;
 	private HTable schemaTable;
@@ -384,6 +401,10 @@ public class HBaseSQLImport implements Runnable {
 			}
 			if (arg.equals("-daily")) {
 				isDaily = true;
+				continue;
+			}
+			if (arg.equals("-verbose")) {
+				s_isVerbose = true;
 				continue;
 			}
 			
@@ -777,8 +798,9 @@ public class HBaseSQLImport implements Runnable {
 
 		for (HBaseDictionary d:list) {
 			String formatted = String.format(
-				"%s\t%s (%s) %n\t%s%n", 
-				HBaseHelper.padRight(d.getRowKey(), 30, ' '), 
+				"%s  %s (%s)  %s%n", 
+				d.getFQ(),
+				//HBaseHelper.padRight(d.getFQ(), 30, ' '), 
 				d.getName(), 
 				d.getType(),
 				d.getDescription());
@@ -1066,6 +1088,11 @@ public class HBaseSQLImport implements Runnable {
 			}
 		}
 
+		if (tableDescription == null) {
+			throw new Exception("No Table for " + 
+				description.getQueryName());
+		}
+
 		// Create a reference to the target table
 		HTable htable = 
 			new HTable(this.config, tableDescription.getTableName());
@@ -1114,9 +1141,11 @@ public class HBaseSQLImport implements Runnable {
 				sql += String.format("%n%s", extra.toString());
 			}
 
-			System.out.format("%sRunning the following query:%n%s%n", 
+			if (s_isVerbose) {
+				System.out.format("%sRunning the following query:%n%s%n", 
 					this.prefix, sql);
-					
+			}
+
 			stmt = con.prepareStatement(sql);
 			rs = stmt.executeQuery();
 
@@ -1156,8 +1185,10 @@ public class HBaseSQLImport implements Runnable {
 
 				}
 
-				System.out.format("%sAdding " + columnName + 
+				if (s_isVerbose) {
+					System.out.format("%sAdding " + columnName + 
 						" to column name list%n", this.prefix);
+				}
 
 				columnNames.put(columnName, rsType);
 			}

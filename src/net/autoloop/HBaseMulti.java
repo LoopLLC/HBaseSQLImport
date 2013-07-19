@@ -10,7 +10,6 @@ public class HBaseMulti {
 
 	public String qn;
    	public String sqlh;
-	public String sqlu;
 	public String sqldb;	
 
 	public HBaseMulti() {}
