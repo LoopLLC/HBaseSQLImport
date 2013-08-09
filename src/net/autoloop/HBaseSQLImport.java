@@ -1309,7 +1309,7 @@ public class HBaseSQLImport implements Runnable {
 		String family = "*";
 		String qualifier = "*";
 		String columnValue = "*";
-		if (!scanFilter.equals("*")) {
+		if (!scanFilter.equals("all")) {
 			String[] filterTokens = scanFilter.split("=");
 			String[] fqTokens = filterTokens[0].split(":");
 			family = fqTokens[0].trim();
@@ -1335,7 +1335,7 @@ public class HBaseSQLImport implements Runnable {
 		byte[] f = Bytes.toBytes(family);
 		byte[] q = Bytes.toBytes(qualifier);
 		
-		if (!scanFilter.equals("*")) {
+		if (!scanFilter.equals("all")) {
 			FilterList filterList = 
 				new FilterList(FilterList.Operator.MUST_PASS_ONE);
 			
