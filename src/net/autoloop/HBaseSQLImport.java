@@ -1703,6 +1703,8 @@ public class HBaseSQLImport implements Runnable {
 			"\t-daily\tImport with the addition of optional ");
 		System.out.println(
 			"\t\tSQL at the end of the file to limit results");
+		System.out.println("\t-import -multi multi.json -sqlu user");
+		System.out.println("\t\tImport from multiple sources at once.");
 		System.out.println("\t-schema SchemaFile.json");
 		System.out.println("");
 		System.out.println("\t-get RowKey -hbt TableName");
