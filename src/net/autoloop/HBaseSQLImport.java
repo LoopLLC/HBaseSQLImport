@@ -1194,6 +1194,8 @@ public class HBaseSQLImport implements Runnable {
 			}
 
 			int totalRowsSaved = 0;
+			int numWriteErrors = 0;
+			int maxWriteErrors = 10;
 
 			while (rs.next()) {
 
@@ -1256,7 +1258,35 @@ public class HBaseSQLImport implements Runnable {
 
 				}
 
-				htable.put(p);
+				try {
+
+					// Write the data to HBase
+					htable.put(p);
+
+				} catch (Exception putex1) {
+					
+					System.out.format("%shtable.put(p) failed on first try, retrying", this.prefix);
+					putex1.printStackTrace();
+
+					// Try again
+					try {
+						htable.put(p);
+					} catch (Exception putex2) {
+
+						// If we've exceeded max acceptable errors, throw the exception
+						if (++numWriteErrors > maxWriteErrors) {
+							throw putex2;
+						} else {
+
+							// Skip this row
+							System.out.format("%shtable.put(p) failed on second try, skipping", 
+									this.prefix);
+							putex2.printStackTrace();
+							continue;
+						}
+					}
+				}
+
 				totalRowsSaved++;
 
 				if (totalRowsSaved % 1000 == 0) {
@@ -1273,6 +1303,7 @@ public class HBaseSQLImport implements Runnable {
 
 		} 
 		catch (Exception e) {
+			System.out.format("%sFAILED!!!", this.prefix);
 			e.printStackTrace();
 		} finally {
 
