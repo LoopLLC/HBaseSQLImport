@@ -231,7 +231,8 @@ public class HBaseSQLImport implements Runnable {
 			return;
 		}
 
-		System.out.println(this.prefix + "starting...");
+        if (this.prefix != null && !this.prefix.equals(""))
+    		System.out.println(this.prefix + "starting...");
 
 		boolean isSave = false;
 		boolean isShow = false;
@@ -255,6 +256,7 @@ public class HBaseSQLImport implements Runnable {
 		String sqlTable = null;
 		String sqlSchema = null;
 		String tableName = null;
+        String zookeeperQuorum = "localhost";
 
 		// The HBase "schema" table can hold the table 
 		// description or the column description.
@@ -407,6 +409,10 @@ public class HBaseSQLImport implements Runnable {
 				s_isVerbose = true;
 				continue;
 			}
+            if (arg.equals("-zkq")) {
+                zookeeperQuorum = args[++i];
+                continue;
+            }
 			
 		}
 
@@ -436,7 +442,7 @@ public class HBaseSQLImport implements Runnable {
 	
 		// If we get to here we will need to connect to HBase
 
-		initHbase();
+		initHbase(zookeeperQuorum);
 		
 		if (isSave) {
 			saveMapping(description);
@@ -483,9 +489,17 @@ public class HBaseSQLImport implements Runnable {
 	/**
 	 * Initialize HBase configuration.
 	 */
-	void initHbase() throws Exception {
+	void initHbase(String zookeeperQuorum) throws Exception {
 
 		this.config = HBaseConfiguration.create();
+
+        String zkq = "hbase.zookeeper.quorum";
+
+        System.out.println("Setting " + zkq + " to " + zookeeperQuorum);
+
+        this.config.set(zkq, zookeeperQuorum);
+
+        System.out.println(zkq + ": " + this.config.get(zkq));
 		
 		Logger.getRootLogger().setLevel(Level.WARN);
 		
