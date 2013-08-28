@@ -407,7 +407,7 @@ public class HBaseHelper {
 				ba[0] = by;
 				return ba;
 			case Types.TIMESTAMP:
-				java.util.Date date = rs.getDate(columnName);
+				java.util.Date date = rs.getTimestamp(columnName);
 				if (rs.wasNull()) {
 					return nullArray;
 				}
