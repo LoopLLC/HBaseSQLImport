@@ -1187,13 +1187,14 @@ public class HBaseSQLImport implements Runnable {
 				if (rsType != HBaseHelper
 						.getJavaSqlDataType(hbColumn.getDataType())) {
 
-					System.out.format("%sResult Set Type " + 
-							rsType + 
-							" does not match HB schema type " + 
-							hbColumn.getDataType() + 
-							" for column %n" + 
-						   columnName, 
-						   this.prefix);
+					System.out.format(
+						"%sResult Set Type %s does not match HB " + 
+						"schema type %s for column %s%n",
+							this.prefix,
+							rsType,
+							hbColumn.getDataType(),
+						   	columnName 
+						  );
 
 					continue;	
 
