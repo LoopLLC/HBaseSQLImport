@@ -252,11 +252,12 @@ public class HBaseSQLImport implements Runnable {
 		String scanFilter = null;
 		String columnFilter = "*";
 		String getRowKey = null;
-		String schemaPath = null;
+		
 		String sqlTable = null;
 		String sqlSchema = null;
 		String tableName = null;
-        String zookeeperQuorum = "localhost";
+                String zookeeperQuorum = "localhost";
+                String schemaFile = null;
 
 		// The HBase "schema" table can hold the table 
 		// description or the column description.
@@ -371,7 +372,7 @@ public class HBaseSQLImport implements Runnable {
 			}
 			if (arg.equals("-schema")) {
 				isSchema = true;
-				schemaPath = args[++i];
+				schemaFile = args[++i];
 				continue;
 			}
 			if (arg.equals("-test")) {
@@ -458,7 +459,7 @@ public class HBaseSQLImport implements Runnable {
 			}
 			importSQL(description, isDaily);	
 		} else if (isSchema) {
-			parseSchemaFile(schemaPath);	
+			parseSchemaFile(schemaFile);	
 		} else if (isTest) {
 			test();
 		} else if (isShowDictionary) {
@@ -512,10 +513,10 @@ public class HBaseSQLImport implements Runnable {
 	 * Parse the JSON schema file and make entries in 
 	 * the HBase schema table.
 	 */
-	void parseSchemaFile(String path) throws Exception {
+	void parseSchemaFile(String schemaFilePath) throws Exception {
 
 		// Read the schema file
-		String json = HBaseHelper.readFile(path);
+		String json = HBaseHelper.readFile(schemaFilePath);
 
 		//System.out.println(json);
 
@@ -564,13 +565,16 @@ public class HBaseSQLImport implements Runnable {
 
 			// Load the SQL query
 			if (d.getType().equals("Table")) {
-				String queryFile = d.getQuery();
+                            //Get the parent directory for the file and then use the relative file path
+                            String queryFilePath = (new File(schemaFilePath)).getParent();
+                            
+                            String queryFile = new File( queryFilePath, d.getQuery()).getPath();
 
-				String sql = HBaseHelper.readFile(queryFile);
+                            String sql = HBaseHelper.readFile(queryFile);
 
-				System.out.println(sql);
+                            System.out.println(sql);
 
-				d.setQuery(sql);
+                            d.setQuery(sql);
 			}
 
 			putDescription(d);
