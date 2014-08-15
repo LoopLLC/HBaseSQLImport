@@ -1,0 +1,733 @@
+MainROI.ven-pc.DmscVg_00 starting...
+MainROI.ven-pc.DmscVg_01 starting...
+MainROI.ven-pc.DmscVg_03 starting...
+MainROI.ven-pc.DmscVg_02 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+MainROI.ven-pc.DmscVg_02 Done.  Saved 0 rows.
+MainROI.ven-pc.DmscVg_03 Done.  Saved 0 rows.
+MainROI.ven-pc.DmscVg_01 Done.  Saved 321 rows.
+MainROI.ven-pc.DmscVg_00 Done.  Saved 572 rows.
+ROIDeal.ven-pc.DmscVg_00 starting...
+ROIDeal.ven-pc.DmscVg_02 starting...
+ROIDeal.ven-pc.DmscVg_03 starting...
+ROIDeal.ven-pc.DmscVg_01 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+ROIDeal.ven-pc.DmscVg_03 Done.  Saved 0 rows.
+ROIDeal.ven-pc.DmscVg_02 Done.  Saved 0 rows.
+ROIDeal.ven-pc.DmscVg_00 Done.  Saved 1 rows.
+ROIDeal.ven-pc.DmscVg_01 Done.  Saved 20 rows.
+ROIRO.ven-pc.DmscVg_00 starting...
+ROIRO.ven-pc.DmscVg_01 starting...
+ROIRO.ven-pc.DmscVg_02 starting...
+ROIRO.ven-pc.DmscVg_03 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+ROIRO.ven-pc.DmscVg_02 Done.  Saved 0 rows.
+ROIRO.ven-pc.DmscVg_03 Done.  Saved 0 rows.
+ROIRO.ven-pc.DmscVg_01 Done.  Saved 23 rows.
+ROIRO.ven-pc.DmscVg_00 Done.  Saved 79 rows.
+AppointmentConfirmation.ven-pc.LoopVg_00 starting...
+AppointmentConfirmation.ven-pc.LoopVg_01 starting...
+AppointmentConfirmation.ven-pc.LoopVg_02 starting...
+AppointmentConfirmation.ven-pc.LoopVg_02 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+AppointmentConfirmation.ven-pc.LoopVg_00 Done.  Saved 0 rows.
+AppointmentConfirmation.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+AppointmentConfirmation.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+AppointmentConfirmation.ven-pc.LoopVg_01 Done.  Saved 22 rows.
+CampaignCoupons.ven-pc.LoopVg_00 starting...
+CampaignCoupons.ven-pc.LoopVg_01 starting...
+CampaignCoupons.ven-pc.LoopVg_02 starting...
+CampaignCoupons.ven-pc.LoopVg_02 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+CampaignCoupons.ven-pc.LoopVg_02 Could not find CategoryFlags in HBase schema mapping
+CampaignCoupons.ven-pc.LoopVg_00 Could not find CategoryFlags in HBase schema mapping
+CampaignCoupons.ven-pc.LoopVg_00 Done.  Saved 0 rows.
+CampaignCoupons.ven-pc.LoopVg_02 Could not find CategoryFlags in HBase schema mapping
+CampaignCoupons.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+CampaignCoupons.ven-pc.LoopVg_01 Could not find CategoryFlags in HBase schema mapping
+CampaignCoupons.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+CampaignCoupons.ven-pc.LoopVg_01 Saved 1000 rows...
+CampaignCoupons.ven-pc.LoopVg_01 Done.  Saved 1078 rows.
+CampaignNotifications.ven-pc.LoopVg_01 starting...
+CampaignNotifications.ven-pc.LoopVg_02 starting...
+CampaignNotifications.ven-pc.LoopVg_00 starting...
+CampaignNotifications.ven-pc.LoopVg_02 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+CampaignNotifications.ven-pc.LoopVg_00 Done.  Saved 0 rows.
+CampaignNotifications.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+CampaignNotifications.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+CampaignNotifications.ven-pc.LoopVg_01 Saved 1000 rows...
+CampaignNotifications.ven-pc.LoopVg_01 Done.  Saved 1312 rows.
+CampaignOptOuts.ven-pc.LoopVg_00 starting...
+CampaignOptOuts.ven-pc.LoopVg_01 starting...
+CampaignOptOuts.ven-pc.LoopVg_02 starting...
+CampaignOptOuts.ven-pc.LoopVg_02 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+CampaignOptOuts.ven-pc.LoopVg_00 Done.  Saved 0 rows.
+CampaignOptOuts.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+CampaignOptOuts.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+CampaignOptOuts.ven-pc.LoopVg_01 Done.  Saved 2 rows.
+Companies.ven-pc.LoopVg_00 starting...
+Companies.ven-pc.LoopVg_01 starting...
+Companies.ven-pc.LoopVg_02 starting...
+Companies.ven-pc.LoopVg_02 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Companies.ven-pc.LoopVg_01 Done.  Saved 3 rows.
+Companies.ven-pc.LoopVg_02 Done.  Saved 8 rows.
+Companies.ven-pc.LoopVg_02 Done.  Saved 8 rows.
+Companies.ven-pc.LoopVg_00 Done.  Saved 10 rows.
+Coupons.ven-pc.LoopVg_00 starting...
+Coupons.ven-pc.LoopVg_01 starting...
+Coupons.ven-pc.LoopVg_02 starting...
+Coupons.ven-pc.LoopVg_02 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Coupons.ven-pc.LoopVg_00 Done.  Saved 0 rows.
+Coupons.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+Coupons.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+Coupons.ven-pc.LoopVg_01 Done.  Saved 201 rows.
+CustomerBirthday.ven-pc.LoopVg_00 starting...
+CustomerBirthday.ven-pc.LoopVg_01 starting...
+CustomerBirthday.ven-pc.LoopVg_02 starting...
+CustomerBirthday.ven-pc.LoopVg_02 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+CustomerBirthday.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+CustomerBirthday.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+CustomerBirthday.ven-pc.LoopVg_00 Done.  Saved 0 rows.
+CustomerBirthday.ven-pc.LoopVg_01 Done.  Saved 0 rows.
+CustomerRecovery.ven-pc.LoopVg_00 starting...
+CustomerRecovery.ven-pc.LoopVg_01 starting...
+CustomerRecovery.ven-pc.LoopVg_02 starting...
+CustomerRecovery.ven-pc.LoopVg_02 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+CustomerRecovery.ven-pc.LoopVg_00 Done.  Saved 0 rows.
+CustomerRecovery.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+CustomerRecovery.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+CustomerRecovery.ven-pc.LoopVg_01 Done.  Saved 26 rows.
+Customers.ven-pc.LoopVg_00 starting...
+Customers.ven-pc.LoopVg_01 starting...
+Customers.ven-pc.LoopVg_02 starting...
+Customers.ven-pc.LoopVg_02 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Customers.ven-pc.LoopVg_01 Result Set Type 91 does not match HB schema type datetime for column Birthday
+Customers.ven-pc.LoopVg_00 Result Set Type 91 does not match HB schema type datetime for column Birthday
+Customers.ven-pc.LoopVg_02 Result Set Type 91 does not match HB schema type datetime for column Birthday
+Customers.ven-pc.LoopVg_02 Result Set Type 91 does not match HB schema type datetime for column Birthday
+Customers.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+Customers.ven-pc.LoopVg_00 Done.  Saved 0 rows.
+Customers.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+Customers.ven-pc.LoopVg_01 Saved 1000 rows...
+Customers.ven-pc.LoopVg_01 Done.  Saved 1608 rows.
+DealDefection.ven-pc.LoopVg_00 starting...
+DealDefection.ven-pc.LoopVg_01 starting...
+DealDefection.ven-pc.LoopVg_02 starting...
+DealDefection.ven-pc.LoopVg_02 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+DealDefection.ven-pc.LoopVg_00 Done.  Saved 0 rows.
+DealDefection.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+DealDefection.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+DealDefection.ven-pc.LoopVg_01 Done.  Saved 143 rows.
+Deals.ven-pc.LoopVg_00 starting...
+Deals.ven-pc.LoopVg_01 starting...
+Deals.ven-pc.LoopVg_02 starting...
+Deals.ven-pc.LoopVg_02 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Deals.ven-pc.LoopVg_01 Result Set Type 91 does not match HB schema type datetime for column Birthday
+Deals.ven-pc.LoopVg_02 Result Set Type 91 does not match HB schema type datetime for column Birthday
+Deals.ven-pc.LoopVg_02 Result Set Type 91 does not match HB schema type datetime for column Birthday
+Deals.ven-pc.LoopVg_00 Result Set Type 91 does not match HB schema type datetime for column Birthday
+Deals.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+Deals.ven-pc.LoopVg_00 Done.  Saved 0 rows.
+Deals.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+Deals.ven-pc.LoopVg_01 Done.  Saved 143 rows.
+DeclinedRepairs.ven-pc.LoopVg_00 starting...
+DeclinedRepairs.ven-pc.LoopVg_01 starting...
+DeclinedRepairs.ven-pc.LoopVg_02 starting...
+DeclinedRepairs.ven-pc.LoopVg_02 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+DeclinedRepairs.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+DeclinedRepairs.ven-pc.LoopVg_00 Done.  Saved 0 rows.
+DeclinedRepairs.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+DeclinedRepairs.ven-pc.LoopVg_01 Done.  Saved 4 rows.
+Groups.ven-pc.LoopVg_00 starting...
+Groups.ven-pc.LoopVg_01 starting...
+Groups.ven-pc.LoopVg_02 starting...
+Groups.ven-pc.LoopVg_02 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Groups.ven-pc.LoopVg_02 FAILED!!!Groups.ven-pc.LoopVg_00 FAILED!!!Groups.ven-pc.LoopVg_01 FAILED!!!Groups.ven-pc.LoopVg_02 FAILED!!!LeaseExpiration.ven-pc.LoopVg_00 starting...
+LeaseExpiration.ven-pc.LoopVg_01 starting...
+LeaseExpiration.ven-pc.LoopVg_02 starting...
+LeaseExpiration.ven-pc.LoopVg_02 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+LeaseExpiration.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+LeaseExpiration.ven-pc.LoopVg_00 Done.  Saved 0 rows.
+LeaseExpiration.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+LeaseExpiration.ven-pc.LoopVg_01 Done.  Saved 0 rows.
+Lookups.ven-pc.LoopVg_00 starting...
+Lookups.ven-pc.LoopVg_01 starting...
+Lookups.ven-pc.LoopVg_02 starting...
+Lookups.ven-pc.LoopVg_02 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Lookups.ven-pc.LoopVg_02 FAILED!!!Lookups.ven-pc.LoopVg_00 FAILED!!!Lookups.ven-pc.LoopVg_02 FAILED!!!Lookups.ven-pc.LoopVg_01 FAILED!!!MissedAppointment.ven-pc.LoopVg_00 starting...
+MissedAppointment.ven-pc.LoopVg_01 starting...
+MissedAppointment.ven-pc.LoopVg_02 starting...
+MissedAppointment.ven-pc.LoopVg_02 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+MissedAppointment.ven-pc.LoopVg_00 Done.  Saved 0 rows.
+MissedAppointment.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+MissedAppointment.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+MissedAppointment.ven-pc.LoopVg_01 Done.  Saved 1 rows.
+Notifications.ven-pc.LoopVg_00 starting...
+Notifications.ven-pc.LoopVg_01 starting...
+Notifications.ven-pc.LoopVg_02 starting...
+Notifications.ven-pc.LoopVg_02 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Notifications.ven-pc.LoopVg_00 Done.  Saved 0 rows.
+Notifications.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+Notifications.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+Notifications.ven-pc.LoopVg_01 Done.  Saved 311 rows.
+OptOuts.ven-pc.LoopVg_00 starting...
+OptOuts.ven-pc.LoopVg_01 starting...
+OptOuts.ven-pc.LoopVg_02 starting...
+OptOuts.ven-pc.LoopVg_02 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+OptOuts.ven-pc.LoopVg_00 Done.  Saved 0 rows.
+OptOuts.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+OptOuts.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+OptOuts.ven-pc.LoopVg_01 Done.  Saved 2 rows.
+PartsArrival.ven-pc.LoopVg_00 starting...
+PartsArrival.ven-pc.LoopVg_01 starting...
+PartsArrival.ven-pc.LoopVg_02 starting...
+PartsArrival.ven-pc.LoopVg_02 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+PartsArrival.ven-pc.LoopVg_00 Done.  Saved 0 rows.
+PartsArrival.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+PartsArrival.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+PartsArrival.ven-pc.LoopVg_01 Done.  Saved 5 rows.
+QuoteProspects.ven-pc.LoopVg_00 starting...
+QuoteProspects.ven-pc.LoopVg_01 starting...
+QuoteProspects.ven-pc.LoopVg_02 starting...
+QuoteProspects.ven-pc.LoopVg_02 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+QuoteProspects.ven-pc.LoopVg_01 Done.  Saved 0 rows.
+QuoteProspects.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+QuoteProspects.ven-pc.LoopVg_00 Done.  Saved 0 rows.
+QuoteProspects.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+RepairOrders.ven-pc.LoopVg_00 starting...
+RepairOrders.ven-pc.LoopVg_01 starting...
+RepairOrders.ven-pc.LoopVg_02 starting...
+RepairOrders.ven-pc.LoopVg_02 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+RepairOrders.ven-pc.LoopVg_02 Result Set Type 91 does not match HB schema type datetime for column Birthday
+RepairOrders.ven-pc.LoopVg_00 Result Set Type 91 does not match HB schema type datetime for column Birthday
+RepairOrders.ven-pc.LoopVg_01 Result Set Type 91 does not match HB schema type datetime for column Birthday
+RepairOrders.ven-pc.LoopVg_02 Result Set Type 91 does not match HB schema type datetime for column Birthday
+RepairOrders.ven-pc.LoopVg_00 Done.  Saved 0 rows.
+RepairOrders.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+RepairOrders.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+RepairOrders.ven-pc.LoopVg_01 Saved 1000 rows...
+RepairOrders.ven-pc.LoopVg_01 Done.  Saved 1598 rows.
+RODefection.ven-pc.LoopVg_00 starting...
+RODefection.ven-pc.LoopVg_01 starting...
+RODefection.ven-pc.LoopVg_02 starting...
+RODefection.ven-pc.LoopVg_02 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+RODefection.ven-pc.LoopVg_00 Done.  Saved 0 rows.
+RODefection.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+RODefection.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+RODefection.ven-pc.LoopVg_01 Saved 1000 rows...
+RODefection.ven-pc.LoopVg_01 Done.  Saved 1598 rows.
+SalesFollowup.ven-pc.LoopVg_00 starting...
+SalesFollowup.ven-pc.LoopVg_01 starting...
+SalesFollowup.ven-pc.LoopVg_02 starting...
+SalesFollowup.ven-pc.LoopVg_02 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+SalesFollowup.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+SalesFollowup.ven-pc.LoopVg_00 Done.  Saved 0 rows.
+SalesFollowup.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+SalesFollowup.ven-pc.LoopVg_01 Done.  Saved 1 rows.
+ScheduledMaintenance.ven-pc.LoopVg_00 starting...
+ScheduledMaintenance.ven-pc.LoopVg_01 starting...
+ScheduledMaintenance.ven-pc.LoopVg_02 starting...
+ScheduledMaintenance.ven-pc.LoopVg_02 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+ScheduledMaintenance.ven-pc.LoopVg_00 Done.  Saved 0 rows.
+ScheduledMaintenance.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+ScheduledMaintenance.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+ScheduledMaintenance.ven-pc.LoopVg_01 Done.  Saved 94 rows.
+ServiceCompletion.ven-pc.LoopVg_00 starting...
+ServiceCompletion.ven-pc.LoopVg_01 starting...
+ServiceCompletion.ven-pc.LoopVg_02 starting...
+ServiceCompletion.ven-pc.LoopVg_02 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+ServiceCompletion.ven-pc.LoopVg_00 Done.  Saved 0 rows.
+ServiceCompletion.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+ServiceCompletion.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+ServiceCompletion.ven-pc.LoopVg_01 Done.  Saved 5 rows.
+ServiceContract.ven-pc.LoopVg_00 starting...
+ServiceContract.ven-pc.LoopVg_01 starting...
+ServiceContract.ven-pc.LoopVg_02 starting...
+ServiceContract.ven-pc.LoopVg_02 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+ServiceContract.ven-pc.LoopVg_00 Done.  Saved 0 rows.
+ServiceContract.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+ServiceContract.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+ServiceContract.ven-pc.LoopVg_01 Done.  Saved 0 rows.
+ServiceFollowup.ven-pc.LoopVg_00 starting...
+ServiceFollowup.ven-pc.LoopVg_01 starting...
+ServiceFollowup.ven-pc.LoopVg_02 starting...
+ServiceFollowup.ven-pc.LoopVg_02 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+ServiceFollowup.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+ServiceFollowup.ven-pc.LoopVg_00 Done.  Saved 0 rows.
+ServiceFollowup.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+ServiceFollowup.ven-pc.LoopVg_01 Done.  Saved 14 rows.
+ServiceToSales.ven-pc.LoopVg_00 starting...
+ServiceToSales.ven-pc.LoopVg_01 starting...
+ServiceToSales.ven-pc.LoopVg_02 starting...
+ServiceToSales.ven-pc.LoopVg_02 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+ServiceToSales.ven-pc.LoopVg_01 Done.  Saved 0 rows.
+ServiceToSales.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+ServiceToSales.ven-pc.LoopVg_00 Done.  Saved 0 rows.
+ServiceToSales.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+StateInspection.ven-pc.LoopVg_00 starting...
+StateInspection.ven-pc.LoopVg_01 starting...
+StateInspection.ven-pc.LoopVg_02 starting...
+StateInspection.ven-pc.LoopVg_02 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+StateInspection.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+StateInspection.ven-pc.LoopVg_00 Done.  Saved 0 rows.
+StateInspection.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+StateInspection.ven-pc.LoopVg_01 Done.  Saved 2 rows.
+TireDue.ven-pc.LoopVg_00 starting...
+TireDue.ven-pc.LoopVg_01 starting...
+TireDue.ven-pc.LoopVg_02 starting...
+TireDue.ven-pc.LoopVg_02 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+TireDue.ven-pc.LoopVg_01 Done.  Saved 0 rows.
+TireDue.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+TireDue.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+TireDue.ven-pc.LoopVg_00 Done.  Saved 0 rows.
+ToyotaCare.ven-pc.LoopVg_00 starting...
+ToyotaCare.ven-pc.LoopVg_01 starting...
+ToyotaCare.ven-pc.LoopVg_02 starting...
+ToyotaCare.ven-pc.LoopVg_02 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+ToyotaCare.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+ToyotaCare.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+ToyotaCare.ven-pc.LoopVg_00 Done.  Saved 0 rows.
+ToyotaCare.ven-pc.LoopVg_01 Done.  Saved 0 rows.
+TradeCycle.ven-pc.LoopVg_00 starting...
+TradeCycle.ven-pc.LoopVg_01 starting...
+TradeCycle.ven-pc.LoopVg_02 starting...
+TradeCycle.ven-pc.LoopVg_02 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+TradeCycle.ven-pc.LoopVg_00 Done.  Saved 0 rows.
+TradeCycle.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+TradeCycle.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+TradeCycle.ven-pc.LoopVg_01 Done.  Saved 117 rows.
+VehicleAccessories.ven-pc.LoopVg_00 starting...
+VehicleAccessories.ven-pc.LoopVg_01 starting...
+VehicleAccessories.ven-pc.LoopVg_02 starting...
+VehicleAccessories.ven-pc.LoopVg_02 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+VehicleAccessories.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+VehicleAccessories.ven-pc.LoopVg_00 Done.  Saved 0 rows.
+VehicleAccessories.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+VehicleAccessories.ven-pc.LoopVg_01 Done.  Saved 0 rows.
+VehicleAnniversary.ven-pc.LoopVg_00 starting...
+VehicleAnniversary.ven-pc.LoopVg_01 starting...
+VehicleAnniversary.ven-pc.LoopVg_02 starting...
+VehicleAnniversary.ven-pc.LoopVg_02 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+VehicleAnniversary.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+VehicleAnniversary.ven-pc.LoopVg_01 Done.  Saved 0 rows.
+VehicleAnniversary.ven-pc.LoopVg_00 Done.  Saved 0 rows.
+VehicleAnniversary.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+VehicleUpgrade.ven-pc.LoopVg_00 starting...
+VehicleUpgrade.ven-pc.LoopVg_01 starting...
+VehicleUpgrade.ven-pc.LoopVg_02 starting...
+VehicleUpgrade.ven-pc.LoopVg_02 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+VehicleUpgrade.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+VehicleUpgrade.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+VehicleUpgrade.ven-pc.LoopVg_00 Done.  Saved 0 rows.
+VehicleUpgrade.ven-pc.LoopVg_01 Done.  Saved 0 rows.
+WarrantyExpiration.ven-pc.LoopVg_00 starting...
+WarrantyExpiration.ven-pc.LoopVg_01 starting...
+WarrantyExpiration.ven-pc.LoopVg_02 starting...
+WarrantyExpiration.ven-pc.LoopVg_02 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+WarrantyExpiration.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+WarrantyExpiration.ven-pc.LoopVg_00 Done.  Saved 0 rows.
+WarrantyExpiration.ven-pc.LoopVg_02 Done.  Saved 0 rows.
+WarrantyExpiration.ven-pc.LoopVg_01 Done.  Saved 1 rows.
+ShortURLLookups.ven-pc.SurlVg_00 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+ShortURLLookups.ven-pc.SurlVg_00 Done.  Saved 21 rows.
+surl10.ven-pc.SurlVg_00 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+surl10.ven-pc.SurlVg_00 Done.  Saved 0 rows.
+surl11.ven-pc.SurlVg_00 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+surl11.ven-pc.SurlVg_00 Done.  Saved 0 rows.
+surl12.ven-pc.SurlVg_00 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+surl12.ven-pc.SurlVg_00 Done.  Saved 0 rows.
+surl13.ven-pc.SurlVg_00 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+surl13.ven-pc.SurlVg_00 Done.  Saved 27 rows.
+surl14.ven-pc.SurlVg_00 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+surl14.ven-pc.SurlVg_00 Done.  Saved 1 rows.
+surl15.ven-pc.SurlVg_00 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+surl15.ven-pc.SurlVg_00 Done.  Saved 0 rows.
+surl16.ven-pc.SurlVg_00 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+surl16.ven-pc.SurlVg_00 Done.  Saved 0 rows.
+surl17.ven-pc.SurlVg_00 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+surl17.ven-pc.SurlVg_00 Done.  Saved 14 rows.
+surl18.ven-pc.SurlVg_00 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+surl18.ven-pc.SurlVg_00 Done.  Saved 0 rows.
+surl1.ven-pc.SurlVg_00 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+surl1.ven-pc.SurlVg_00 Saved 1000 rows...
+surl1.ven-pc.SurlVg_00 Saved 2000 rows...
+surl1.ven-pc.SurlVg_00 Saved 3000 rows...
+surl1.ven-pc.SurlVg_00 Saved 4000 rows...
+surl1.ven-pc.SurlVg_00 Saved 5000 rows...
+surl1.ven-pc.SurlVg_00 Saved 6000 rows...
+surl1.ven-pc.SurlVg_00 Saved 7000 rows...
+surl1.ven-pc.SurlVg_00 Saved 8000 rows...
+surl1.ven-pc.SurlVg_00 Saved 9000 rows...
+surl1.ven-pc.SurlVg_00 Saved 10000 rows...
+surl1.ven-pc.SurlVg_00 Saved 11000 rows...
+surl1.ven-pc.SurlVg_00 Saved 12000 rows...
+surl1.ven-pc.SurlVg_00 Saved 13000 rows...
+surl1.ven-pc.SurlVg_00 Saved 14000 rows...
+surl1.ven-pc.SurlVg_00 Saved 15000 rows...
+surl1.ven-pc.SurlVg_00 Saved 16000 rows...
+surl1.ven-pc.SurlVg_00 Saved 17000 rows...
+surl1.ven-pc.SurlVg_00 Saved 18000 rows...
+surl1.ven-pc.SurlVg_00 Saved 19000 rows...
+surl1.ven-pc.SurlVg_00 Saved 20000 rows...
+surl1.ven-pc.SurlVg_00 Done.  Saved 20084 rows.
+surl2.ven-pc.SurlVg_00 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+surl2.ven-pc.SurlVg_00 Done.  Saved 1 rows.
+surl3.ven-pc.SurlVg_00 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+surl3.ven-pc.SurlVg_00 Done.  Saved 15 rows.
+surl4.ven-pc.SurlVg_00 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+surl4.ven-pc.SurlVg_00 Done.  Saved 15 rows.
+surl5.ven-pc.SurlVg_00 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+surl5.ven-pc.SurlVg_00 Done.  Saved 0 rows.
+surl6.ven-pc.SurlVg_00 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+surl6.ven-pc.SurlVg_00 Done.  Saved 5 rows.
+surl7.ven-pc.SurlVg_00 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+surl7.ven-pc.SurlVg_00 Done.  Saved 0 rows.
+surl8.ven-pc.SurlVg_00 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+surl8.ven-pc.SurlVg_00 Done.  Saved 5 rows.
+surl9.ven-pc.SurlVg_00 starting...
+Setting hbase.zookeeper.quorum to node1.loop.devlocal
+hbase.zookeeper.quorum: node1.loop.devlocal
+surl9.ven-pc.SurlVg_00 Done.  Saved 5 rows.

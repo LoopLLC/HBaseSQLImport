@@ -242,6 +242,11 @@ public class HBaseSQLImport implements Runnable {
 		boolean isSqlDescribe = false;
 		boolean isSqlGenerate = false;
 		boolean isImport = false;
+                /* Maintenance Window, pass start hour:min-endhour:min
+                         * example: 01:00-05:00 means 1 AM to 5 AM
+                                    13:00-17:00 means 1 PM to 5 PM
+                        */
+                String maintenanceWindow = "";
 		boolean isSchema = false;
 		boolean isTest = false;
 		boolean isShowDictionary = false;
@@ -370,6 +375,22 @@ public class HBaseSQLImport implements Runnable {
 				isImport = true;
 				continue;
 			}
+                        /* Maintenance Window, pass start hour:min-endhour:min
+                         * example: 01:00-05:00 means 1 AM to 5 AM
+                                    13:00-17:00 means 1 PM to 5 PM
+                        */
+                        if (arg.equals("-maintwindow")) {
+                            try{
+                                maintenanceWindow = args[++i];
+                                System.out.println("Maint. Window: " 
+                                    + maintenanceWindow);
+				continue;
+                            }
+                            catch(Exception ex){
+                                
+                            }
+                                
+			}
 			if (arg.equals("-schema")) {
 				isSchema = true;
 				schemaFile = args[++i];
@@ -457,7 +478,7 @@ public class HBaseSQLImport implements Runnable {
 				usage();
 				return;
 			}
-			importSQL(description, isDaily);	
+			importSQL(description, isDaily, maintenanceWindow);	
 		} else if (isSchema) {
 			parseSchemaFile(schemaFile);	
 		} else if (isTest) {
@@ -1084,13 +1105,65 @@ public class HBaseSQLImport implements Runnable {
 			try { con.close(); } catch (Exception e) { }
 		}
 	}
+        
+        /**
+         * Determine maintenance window to prevent some operations 
+         * from executing. All times are in UTC
+         */
+        private static boolean IsMaintenanceWindowActive(
+                String maintenanceWindow) throws Exception{
+            
+            if(maintenanceWindow != null && maintenanceWindow.length() > 0 ){
+                String delims = "[:-]";
+                String[] tokens = maintenanceWindow.split(delims);
 
+                if(tokens.length != 4){
+                    throw new Exception("maintwindow should be in this format " +
+                            "HH:mm-HH:mm");
+                }
+
+                int maintenanceStartHour = Integer.parseInt(tokens[0]);
+                int maintenanceStartMinute = Integer.parseInt(tokens[1]);
+                int maintenanceEndHour = Integer.parseInt(tokens[2]);
+                int maintenanceEndMinute = Integer.parseInt(tokens[3]);
+
+                Calendar startDateTime 
+                        = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                startDateTime.set(Calendar.MILLISECOND, 0);
+                startDateTime.set(Calendar.SECOND, 0);
+                startDateTime.set(Calendar.HOUR_OF_DAY, maintenanceStartHour);
+                startDateTime.set(Calendar.MINUTE, maintenanceStartMinute);
+
+                Calendar endDateTime 
+                        = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                endDateTime.set(Calendar.MILLISECOND, 0);
+                endDateTime.set(Calendar.SECOND, 0);
+                endDateTime.set(Calendar.HOUR_OF_DAY, maintenanceEndHour);
+                endDateTime.set(Calendar.MINUTE, maintenanceEndMinute);
+
+               Calendar curTime 
+                        = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+
+                long curTimeInMilliSecs = curTime.getTime().getTime();
+                
+                 if(curTimeInMilliSecs >= startDateTime.getTime().getTime() &&
+                     curTimeInMilliSecs <  endDateTime.getTime().getTime()  )
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    
 	/**
 	 * Run the import SQL and write the data to HBase.
 	 */
 	private void importSQL(HBaseDescription description, 
-			boolean isDaily) throws Exception {
+			boolean isDaily, String maintenanceWindow) throws Exception {
 
+            
+                
 		// Get the table description and the list of columns
 		HBaseDescription tableDescription = null;
 		List<HBaseDescription> list = 
@@ -1123,6 +1196,12 @@ public class HBaseSQLImport implements Runnable {
 
 		// Execute the SQL stored in schema.d.q
 		try {
+                    
+                    if(IsMaintenanceWindowActive(maintenanceWindow)){
+                                        throw new Exception
+                                            ("Maintenance Hours, exiting " +
+                                                maintenanceWindow);
+                    }
 
 			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
 			con = DriverManager.getConnection(this.connectionString);
@@ -1309,10 +1388,18 @@ public class HBaseSQLImport implements Runnable {
 				totalRowsSaved++;
 
 				if (totalRowsSaved % 1000 == 0) {
-					System.out.format(
-							"%sSaved %s rows...%n", 
-							this.prefix, 
-						   	totalRowsSaved);
+                                    System.out.format(
+                                                "%sSaved %s rows...%n", 
+                                                this.prefix, 
+                                                totalRowsSaved);
+                                        
+                                    if(IsMaintenanceWindowActive(
+                                        maintenanceWindow)){
+                                        throw new Exception
+                                            ("Maintenance Hours, exiting " +
+                                                maintenanceWindow);
+                                        }
+                                   
 				}
 					
 			}
@@ -1748,6 +1835,10 @@ public class HBaseSQLImport implements Runnable {
 		System.out.println();
 		System.out.println("\t-import -qn QueryName " + 
 				"-sqlh Host -sqlu User -sqldb Database");
+                System.out.println("\t-maintwindow HH:mm-HH:mm " + 
+				"(Pass start and end hour/minute " + 
+                                "for a maintenance window. " +
+                                "Applicable for -import only)");
 		System.out.println("\t\tRun the SQL and import data into HBase");
 		System.out.println(
 			"\t-daily\tImport with the addition of optional ");
